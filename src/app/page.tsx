@@ -11,6 +11,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import WeatherWidget from '../components/weather/WeatherWidget';
 import type { Database } from '../lib/supabase/types';
 
 /**
@@ -113,6 +114,20 @@ export default function Home() {
         </View>
         </ResponsiveContainer>
       </View>
+
+      {/* Weather Widget Section - Only for logged-in users */}
+      {user && (
+        <View style={styles.weatherSection}>
+          <ResponsiveContainer>
+            <WeatherWidget 
+              latitude={40.7128} 
+              longitude={-74.0060} 
+              cropType="general"
+              compact={false}
+            />
+          </ResponsiveContainer>
+        </View>
+      )}
 
       {/* Features Section */}
       <View style={styles.featuresSection}>
@@ -379,6 +394,10 @@ const styles = StyleSheet.create({
   },
   heroImage: {
     borderRadius: 16,
+  },
+  weatherSection: {
+    paddingVertical: 24,
+    backgroundColor: '#FAFAFA',
   },
   featuresSection: {
     padding: 24,

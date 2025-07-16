@@ -35,37 +35,45 @@ Garden Buddy is an AI-powered smart farming assistant that helps vegetable and g
 - [x] Build authentication pages (login, register)
 - [x] Design dashboard layout
 
-### Phase 2: Disease Detection System 🔍
+### Phase 2: Disease Detection System 🔍 ✅ (COMPLETED)
 
-#### Image Upload & Processing
-- [ ] Implement camera access for mobile devices
-- [ ] Create image upload component with preview
-- [ ] Set up image storage in Supabase
-- [ ] Add image preprocessing for AI analysis
+#### Image Upload & Processing ✅
+- [x] Implement camera access for mobile devices
+- [x] Create image upload component with preview
+- [x] Set up image storage in Supabase
+- [x] Add image preprocessing for AI analysis
 
-#### AI Integration
-- [ ] Configure OpenAI GPT-4 Vision API
-- [ ] Develop prompt engineering for accurate diagnosis
-- [ ] Implement confidence scoring algorithm
-- [ ] Create fallback mechanisms for low-confidence results
+#### AI Integration ✅
+- [x] Configure multiple AI providers (Claude AI, OpenAI GPT-4 Vision)
+- [x] Develop prompt engineering for accurate diagnosis
+- [x] Implement confidence scoring algorithm
+- [x] Create fallback mechanisms with plant disease database
+- [x] Add community voting system for low-confidence results
 
-#### Treatment Recommendation Engine
-- [ ] Build treatment database from CABI/Plantwise data
-- [ ] Develop GPT-4 prompts for treatment recommendations
-- [ ] Create UI for displaying organic vs. chemical options
-- [ ] Implement treatment saving functionality
+#### Treatment Recommendation Engine ✅
+- [x] Build comprehensive treatment database (6 common diseases)
+- [x] Develop AI prompts for treatment recommendations
+- [x] Create UI for displaying organic vs. chemical options
+- [x] Implement treatment saving functionality
 
-#### Diagnosis Flow
-- [ ] Design step-by-step diagnosis workflow
-- [ ] Create results page with detailed information
-- [ ] Implement save to logbook functionality
-- [ ] Add sharing capabilities for diagnoses
+#### Diagnosis Flow ✅
+- [x] Design step-by-step diagnosis workflow
+- [x] Create results page with detailed information
+- [x] Implement save to logbook functionality
+- [x] Add community sharing capabilities for diagnoses
+
+#### 🚀 Phase 2.5: Enhanced ML Integration (NEW)
+- [ ] Integrate TensorFlow.js for offline diagnosis
+- [ ] Implement PlantVillage dataset models
+- [ ] Add ml5.js for simplified browser-based ML
+- [ ] Create hybrid online/offline diagnosis system
 
 ### Phase 3: Weather Integration & Alerts 🌦️
 
 #### Weather API Integration
-- [ ] Set up OpenWeatherMap API connection
-- [ ] Implement location-based weather fetching
+- [ ] Set up OpenWeatherMap API connection (Free: 60 calls/min)
+- [ ] Implement WeatherAPI.com as backup (Free tier)
+- [ ] Add Agromonitoring API for satellite data
 - [ ] Create weather data processing functions
 - [ ] Design weather display components
 
@@ -74,30 +82,40 @@ Garden Buddy is an AI-powered smart farming assistant that helps vegetable and g
 - [ ] Create pest infestation risk models based on temperature
 - [ ] Implement crop-specific risk thresholds
 - [ ] Build notification triggering system
+- [ ] Add seasonal disease pattern recognition
 
 #### Alert System
 - [ ] Design alert UI components
-- [ ] Create alert scheduling system
-- [ ] Implement push notification system
+- [ ] Create alert scheduling system with Supabase Edge Functions
+- [ ] Implement Firebase Cloud Messaging (FCM) for push notifications
 - [ ] Build alert management interface for users
+- [ ] Add Trigger.dev integration for advanced automation
 
-#### Spray Calendar
+#### Spray Calendar & Tracking
 - [ ] Design calendar interface for tracking sprays
 - [ ] Implement spray scheduling algorithm
 - [ ] Create reminder system for upcoming sprays
 - [ ] Add manual spray logging functionality
+- [ ] **NEW**: Spray resistance tracking to avoid overuse
+- [ ] **NEW**: Weather-optimal spray timing recommendations
 
-### Phase 4: Crop Logbook & History 📝
+### Phase 4: Enhanced Crop Management 📝
 
-#### Logbook Implementation
-- [ ] Design logbook interface
+#### Advanced Logbook Implementation
+- [ ] Design Notion-style logbook interface with react-table
 - [ ] Create data structure for storing diagnoses history
 - [ ] Implement filtering and sorting capabilities
 - [ ] Add notes and custom fields for entries
+- [ ] **NEW**: GPS field tagging for location-based tracking
+- [ ] **NEW**: Before/after treatment photo comparisons
+- [ ] **NEW**: Export functionality for farm records
 
-#### Analytics Dashboard
-- [ ] Design analytics components
-- [ ] Implement data visualization with Chart.js
+#### Enhanced Analytics Dashboard
+- [ ] Design analytics components with Chart.js/D3.js
+- [ ] Implement treatment outcome tracking
+- [ ] **NEW**: Disease trend analytics by region
+- [ ] **NEW**: Seasonal pattern recognition
+- [ ] **NEW**: Success rate metrics for different treatments
 - [ ] Create disease trend analysis
 - [ ] Add seasonal patterns recognition
 
@@ -107,45 +125,53 @@ Garden Buddy is an AI-powered smart farming assistant that helps vegetable and g
 - [ ] Add sharing options for reports
 - [ ] Design printable spray schedules
 
-### Phase 5: Community Features 👥
+### Phase 5: Community Features 👥 ✅ (PARTIALLY COMPLETED)
 
-#### Community Feed
-- [ ] Design community interface
-- [ ] Implement post creation for diagnoses
-- [ ] Create commenting system
-- [ ] Add moderation tools
+#### Community Feed ✅
+- [x] Design community interface
+- [x] Implement diagnosis sharing system
+- [x] Create voting mechanism for community validation
+- [ ] Add commenting system for discussions
+- [ ] **NEW**: Expert verification system
+- [ ] **NEW**: Regional disease alerts based on community reports
 
-#### Voting System
-- [ ] Design voting UI
-- [ ] Implement upvote/downvote functionality
-- [ ] Create reputation system
-- [ ] Build consensus algorithm for community diagnoses
+#### Enhanced User Profiles & Expertise
+- [x] Create user profile system
+- [ ] Implement expertise levels and badges
+- [ ] Add following/follower functionality
+- [ ] Create leaderboards for active contributors
+- [ ] **NEW**: Multilingual voice advice system
+- [ ] **NEW**: Expert mode toggle (beginner vs professional UI)
 
-#### User Profiles
-- [ ] Enhance user profiles with community features
-- [ ] Add badges and achievements
-- [ ] Implement following/followers functionality
-- [ ] Create expert verification system
+#### 🚀 Phase 5.5: Advanced Community Features (NEW)
+- [ ] Community Q&A system (moderated or AI-supported)
+- [ ] Success story sharing with before/after photos
+- [ ] Local farming groups and regional discussions
+- [ ] Integration with agricultural extension services
 
-### Phase 6: AI Q&A System 💬
+### Phase 6: AI Q&A System & Offline Capabilities 🤖
 
-#### Chat Interface
-- [ ] Design conversational UI
-- [ ] Implement message threading
-- [ ] Create typing indicators and loading states
-- [ ] Add image attachment in conversations
+#### Enhanced Chat Interface
+- [ ] Design chat UI components
+- [ ] Implement real-time messaging
+- [ ] Create conversation history storage
+- [ ] Add typing indicators and message status
+- [ ] **NEW**: Voice input/output for accessibility
+- [ ] **NEW**: Multilingual support for global users
 
-#### AI Integration
-- [ ] Configure GPT-4 for agricultural knowledge
-- [ ] Implement prompt chaining for complex questions
-- [ ] Create context management for conversations
-- [ ] Add feedback mechanism for answers
+#### Advanced AI Integration
+- [ ] Configure GPT-4 for agricultural Q&A
+- [ ] Develop specialized prompts for farming advice
+- [ ] Implement context awareness from user's diagnoses
+- [ ] Create knowledge base integration
+- [ ] **NEW**: Integration with CABI Plantwise Knowledge Bank
+- [ ] **NEW**: Invasive Species Compendium integration
 
-#### Knowledge Base
-- [ ] Compile agricultural knowledge database
-- [ ] Implement search functionality
-- [ ] Create categorized browsing
-- [ ] Add saving favorite answers
+#### Offline Capabilities & PWA
+- [ ] **NEW**: Implement Progressive Web App (PWA) features
+- [ ] **NEW**: TensorFlow.js integration for offline diagnosis
+- [ ] **NEW**: Cached treatment recommendations
+- [ ] **NEW**: Offline-first data synchronization
 
 ### Phase 7: Refinement & Launch 🚀
 
@@ -172,6 +198,27 @@ Garden Buddy is an AI-powered smart farming assistant that helps vegetable and g
 - [ ] Create marketing materials
 - [ ] Prepare app store listings
 - [ ] Plan launch strategy
+
+## 📚 Additional Resources
+
+### GitHub Projects for Reference
+- **Plant Disease Detector**: React + Flask + TensorFlow integration patterns
+- **ML Plant Doctor**: MobileNet with TensorFlow.js implementation
+- **React Farm Logbook**: Crop and weather logging system architecture
+- **SmartAgro**: Agriculture web app UI/UX best practices
+- **CropCare**: Django/React crop diagnosis and alert system
+
+### Free Datasets & APIs
+- **PlantVillage Dataset** (Kaggle): 87k+ labeled plant disease images
+- **OpenWeatherMap**: Weather data with agricultural focus
+- **CABI Knowledge Bank**: Professional treatment recommendations
+- **HuggingFace**: Pre-trained vision models for plant recognition
+
+### Development Tools
+- **TensorFlow.js**: Browser-based ML for offline capabilities
+- **Firebase FCM**: Free push notifications
+- **Supabase Edge Functions**: Serverless backend automation
+- **Trigger.dev**: Advanced workflow automation
 
 ## 🛠️ Technical Implementation Details
 
@@ -251,52 +298,52 @@ sequenceDiagram
 ### Users Table
 ```sql
 CREATE TABLE users (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT UNIQUE NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  last_login TIMESTAMP WITH TIME ZONE,
-  location JSONB,
-  preferred_crops TEXT[],
-  notification_preferences JSONB
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  full_name VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
 ### Profiles Table
 ```sql
 CREATE TABLE profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  full_name TEXT,
-  avatar_url TEXT,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  full_name VARCHAR(255),
+  avatar_url VARCHAR(255),
   bio TEXT,
-  expertise_level TEXT,
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  expertise_level VARCHAR(255),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
 ### Diagnoses Table
 ```sql
 CREATE TABLE diagnoses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  image_url TEXT NOT NULL,
-  plant_type TEXT NOT NULL,
-  disease_name TEXT,
+  image_url VARCHAR(255) NOT NULL,
+  plant_type VARCHAR(255) NOT NULL,
+  disease_name VARCHAR(255),
   confidence_score DECIMAL,
   ai_diagnosis JSONB,
   community_diagnosis JSONB,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  status TEXT DEFAULT 'pending'
+  created_at TIMESTAMP DEFAULT NOW(),
+  status VARCHAR(255) DEFAULT 'pending'
 );
 ```
 
 ### Treatments Table
 ```sql
 CREATE TABLE treatments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   diagnosis_id UUID REFERENCES diagnoses(id) ON DELETE CASCADE,
-  treatment_type TEXT NOT NULL,
+  treatment_type VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
-  application_date TIMESTAMP WITH TIME ZONE,
+  application_date TIMESTAMP,
   effectiveness_rating INTEGER
 );
 ```
@@ -304,24 +351,24 @@ CREATE TABLE treatments (
 ### Weather_Alerts Table
 ```sql
 CREATE TABLE weather_alerts (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  alert_type TEXT NOT NULL,
+  alert_type VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  expires_at TIMESTAMP WITH TIME ZONE,
-  status TEXT DEFAULT 'active'
+  created_at TIMESTAMP DEFAULT NOW(),
+  expires_at TIMESTAMP,
+  status VARCHAR(255) DEFAULT 'active'
 );
 ```
 
 ### Community_Votes Table
 ```sql
 CREATE TABLE community_votes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   diagnosis_id UUID REFERENCES diagnoses(id) ON DELETE CASCADE,
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  voted_disease TEXT NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  voted_disease VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
@@ -379,24 +426,36 @@ Prefer treatments that are widely available and cost-effective for small-scale f
 ## 🧪 Testing Strategy
 
 ### Unit Testing
-- Test individual components and functions
-- Ensure API integrations work correctly
-- Validate data processing functions
+- Component testing with Jest and React Testing Library
+- API endpoint testing
+- Database function testing
+- AI prompt testing and validation
+- **NEW**: ML model accuracy testing with PlantVillage dataset
+- **NEW**: Offline functionality testing
 
 ### Integration Testing
-- Test authentication flow
-- Verify image upload and processing
-- Validate weather data integration
+- End-to-end user flows with Cypress
+- API integration testing
+- Database migration testing
+- Third-party service integration testing
+- **NEW**: Weather API integration testing
+- **NEW**: Push notification delivery testing
+- **NEW**: GPS and location services testing
 
-### User Acceptance Testing
-- Test with a small group of farmers
-- Gather feedback on UI/UX
-- Validate diagnosis accuracy
+### User Testing
+- Beta testing with real farmers and gardeners
+- Usability testing for mobile and desktop
+- Accessibility testing (voice, multilingual)
+- Performance testing under load
+- **NEW**: Offline mode usability testing
+- **NEW**: Voice interface testing
+- **NEW**: Cross-platform PWA testing
 
-### Performance Testing
-- Test app performance on various devices
-- Measure API response times
-- Optimize image processing
+### Success Metrics
+- **User Engagement**: Daily active users, photos uploaded per user
+- **Community Participation**: Voting rate, comment engagement
+- **Diagnosis Accuracy**: AI confidence scores, community validation
+- **Treatment Success**: User-reported outcome tracking
 
 ## 🚀 Launch Strategy
 
@@ -415,31 +474,44 @@ Prefer treatments that are widely available and cost-effective for small-scale f
 - Reach out to agricultural communities
 - Partner with agricultural extension services
 
-## 📈 Future Expansion Ideas
+## 🚀 Future Expansion Ideas
 
-### Advanced Features
-- Soil analysis integration
-- Drone imagery support
-- IoT sensor integration for automated monitoring
-- Machine learning model that improves with community feedback
+### 🎯 High-Impact Bonus Features (From Research)
+- **📍 GPS Field Tagging**: Location-based crop tracking and revisit alerts
+- **🗣️ Multilingual Voice Advice**: Audio recommendations in native languages
+- **🌐 Offline Mode**: PWA with TensorFlow.js for low-connectivity areas
+- **🧪 Spray Tracker**: Resistance prevention through application tracking
+- **📊 Disease Trend Analytics**: Regional and seasonal pattern recognition
+- **🤝 Expert Verification**: Professional validation of community diagnoses
 
-### Business Model Options
-- Freemium model with basic features free, advanced features paid
-- Subscription for premium features and unlimited diagnoses
-- Partnership with agricultural input suppliers
-- White-label solution for agricultural extension services
+### Advanced Technical Features
+- **IoT Integration**: Connect with soil sensors, weather stations
+- **Drone Integration**: Aerial crop monitoring and disease detection
+- **Edge Computing**: On-device ML processing for instant results
+- **Blockchain**: Immutable crop history and treatment records
+- **AR/VR**: Augmented reality for in-field diagnosis guidance
 
-## 🔄 Maintenance Plan
+### Business & Scaling
+- **Marketplace**: Connect farmers with suppliers and buyers
+- **Insurance Integration**: Crop loss documentation and claims
+- **Precision Agriculture**: GPS-guided treatment recommendations
+- **B2B Solutions**: Enterprise features for large farms
+- **API Marketplace**: Third-party integrations and extensions
 
-### Regular Updates
-- Bi-weekly bug fixes
-- Monthly feature updates
-- Quarterly major releases
+### Monetization Strategies
+- **Premium AI Models**: Access to specialized, high-accuracy models
+- **Professional Dashboard**: Advanced analytics and multi-field management
+- **API Access**: Allow third-party integrations and white-labeling
+- **Consultation Services**: Connect with agricultural experts
+- **Hardware Partnerships**: Integrate with farming equipment and sensors
 
-### Data Management
-- Regular database backups
-- User data privacy compliance
-- Performance monitoring and optimization
+### Global Expansion
+- **Localization**: Support for different crops and regional diseases
+- **Language Support**: Multi-language interface with voice capabilities
+- **Regional Partnerships**: Work with agricultural extension services
+- **Offline-First Architecture**: Support for areas with limited internet
+- **Mobile App**: Native iOS and Android with full feature parity
+- **Government Integration**: Work with agricultural departments for data sharing
 
 ### Community Management
 - Moderation of community content
