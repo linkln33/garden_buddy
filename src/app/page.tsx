@@ -133,7 +133,8 @@ export default function Home() {
       <View style={styles.featuresSection}>
         <ResponsiveContainer>
         <Text style={styles.sectionTitle}>Key Features</Text>
-        <View style={[styles.featuresGrid, isDesktop && { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }]}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.featuresScrollView}>
+          <View style={styles.featuresGrid}>
           <Card style={styles.featureCard}>
             <View style={styles.featureIconContainer}>
               <FaSearch size={32} color="#4CAF50" />
@@ -197,7 +198,8 @@ export default function Home() {
               size="small"
             />
           </Card>
-        </View>
+          </View>
+        </ScrollView>
         </ResponsiveContainer>
       </View>
 
@@ -410,15 +412,21 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     textAlign: 'center',
   },
+  featuresScrollView: {
+    marginBottom: 16,
+  },
   featuresGrid: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    gap: 24,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    gap: 16,
+    paddingHorizontal: 4,
+    paddingBottom: 8,
   },
   featureCard: {
     width: 280,
     padding: 24,
     alignItems: 'center',
+    marginRight: 8,
   },
   featureIconContainer: {
     width: 64,

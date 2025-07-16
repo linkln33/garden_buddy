@@ -6,9 +6,23 @@ import { Card, Button } from 'react-native-paper';
 import { createBrowserClient } from '@supabase/ssr';
 import { 
   FaMapMarkerAlt, FaSync, FaTint, FaCloudRain, FaWind, FaSun, FaThermometerHalf, FaExclamationTriangle,
-  FaSearch, FaLocationArrow, FaChevronLeft, FaChevronRight 
+  FaSearch, FaLocationArrow, FaChevronLeft, FaChevronRight, FaLayerGroup
 } from 'react-icons/fa';
 import type { Database } from '../../lib/supabase/types';
+import dynamic from 'next/dynamic';
+import StormAlert from '../../components/StormAlert';
+
+// Import WeatherMap component with dynamic import to avoid SSR issues
+const WeatherMap = dynamic(
+  () => import('../../components/WeatherMap'),
+  { ssr: false }
+);
+
+// Import SprayingCalendar component
+const SprayingCalendar = dynamic(
+  () => import('../../components/SprayingCalendar'),
+  { ssr: false }
+);
 
 interface WeatherData {
   current: {
@@ -78,6 +92,9 @@ export default function WeatherPage() {
   const [locationOptions, setLocationOptions] = useState<Array<{name: string; country: string; lat: number; lon: number}>>([]);
   const [currentForecastIndex, setCurrentForecastIndex] = useState(0);
   const [visibleForecastDays, setVisibleForecastDays] = useState(5);
+  const [selectedField, setSelectedField] = useState<string | null>(null);
+  const [cropType, setCropType] = useState<string>('general');
+  const [showInteractiveMap, setShowInteractiveMap] = useState<boolean>(false);
 
   const supabase = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -419,18 +436,39 @@ export default function WeatherPage() {
             
             {/* Right side - Weather Map */}
             <View style={styles.rightContent}>
-              <Text style={styles.title}>Weather Map</Text>
+              <View style={styles.mapHeaderContainer}>
+                <Text style={styles.title}>Weather Map</Text>
+                <Button 
+                  mode="outlined"
+                  icon={() => <FaLayerGroup size={14} />}
+                  onPress={() => setShowInteractiveMap(!showInteractiveMap)}
+                  style={styles.mapToggleButton}
+                >
+                  {showInteractiveMap ? 'Simple Map' : 'Interactive Map'}
+                </Button>
+              </View>
               <View style={styles.weatherMapContainer}>
-                <iframe 
-                  src={`https://openweathermap.org/weathermap?basemap=map&cities=false&layer=temperature&lat=${location.latitude || 37.7749}&lon=${location.longitude || -122.4194}&zoom=10`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    border: 'none',
-                    borderRadius: 8
-                  }}
-                  title="Weather Map"
-                ></iframe>
+                {showInteractiveMap ? (
+                  <WeatherMap 
+                    latitude={location.latitude || 37.7749} 
+                    longitude={location.longitude || -122.4194}
+                    onFieldSelect={(fieldId: string, fieldCropType: string) => {
+                      setSelectedField(fieldId);
+                      setCropType(fieldCropType || 'general');
+                    }}
+                  />
+                ) : (
+                  <iframe 
+                    src={`https://openweathermap.org/weathermap?basemap=map&cities=false&layer=temperature&lat=${location.latitude || 37.7749}&lon=${location.longitude || -122.4194}&zoom=10`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      borderRadius: 8
+                    }}
+                    title="Weather Map"
+                  ></iframe>
+                )}
               </View>
             </View>
           </View>
@@ -442,34 +480,30 @@ export default function WeatherPage() {
         <Card style={styles.card}>
           <Text style={styles.title}>Spray Recommendations</Text>
           {sprayRecommendations.map((recommendation: SprayRecommendation, index: number) => (
-            <View key={recommendation.id || index} style={styles.alertItem}>
-              <View style={[styles.alertBadge, { backgroundColor: getRiskColor(recommendation.riskLevel || 'low') }]}>
-                <Text style={styles.alertBadgeText}>{recommendation.riskLevel}</Text>
-              </View>
-              <View style={styles.alertContent}>
-                <Text style={styles.alertTitle}>{recommendation.title}</Text>
-                <Text style={styles.alertDescription}>{recommendation.description}</Text>
-                {recommendation.bestSprayTime && (
-                  <Text style={styles.alertInfo}>
-                    <Text style={styles.alertInfoLabel}>Best spray time: </Text>
-                    {recommendation.bestSprayTime}
-                  </Text>
-                )}
-                {recommendation.products && recommendation.products.length > 0 && (
-                  <Text style={styles.alertInfo}>
-                    <Text style={styles.alertInfoLabel}>Recommended products: </Text>
-                    {recommendation.products.join(', ')}
-                  </Text>
-                )}
-              </View>
-              <Button
-                title="Got it"
-                onPress={() => handleDismissAlert(recommendation.id!)}
-                style={styles.dismissButton}
-              />
-            </View>
+            <StormAlert
+              key={recommendation.id || index}
+              title={recommendation.title}
+              description={recommendation.description}
+              severity={recommendation.riskLevel}
+              onDismiss={() => handleDismissAlert(recommendation.id || `alert-${index}`)}
+              additionalInfo={[
+                ...(recommendation.bestTimeToSpray ? [{ label: 'Best spray time', value: recommendation.bestTimeToSpray }] : []),
+                ...(recommendation.recommendedProducts && recommendation.recommendedProducts.length > 0 
+                  ? [{ label: 'Recommended products', value: recommendation.recommendedProducts.join(', ') }] 
+                  : [])
+              ]}
+            />
           ))}
         </Card>
+      )}
+      
+      {/* Smart Spraying Calendar */}
+      {weatherData && (
+        <SprayingCalendar 
+          fieldId={selectedField || undefined} 
+          weatherData={weatherData} 
+          cropType={cropType} 
+        />
       )}
 
       {/* Quick Actions */}
@@ -674,10 +708,20 @@ const styles = StyleSheet.create({
     color: '#666666',
   },
   weatherMapContainer: {
-    height: 300,
+    height: 400,
     backgroundColor: '#F7F7F7',
     borderRadius: 8,
     overflow: 'hidden',
+  },
+  mapHeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  mapToggleButton: {
+    height: 36,
+    paddingHorizontal: 8,
   },
   closeButton: {
     padding: 8,
