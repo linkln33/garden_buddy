@@ -31,26 +31,47 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     try {
       setError(null);
       
-      // In a real implementation, we would use react-native-image-picker or expo-image-picker
-      // For this demo, we'll simulate image selection with a placeholder
+      // Use the browser's getUserMedia API to access the camera
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       
-      // Simulate camera capture delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Create a video element to display the camera feed
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.play();
       
-      // This would be the base64 string from the camera
-      const mockBase64Image = 'mockBase64StringFromCamera';
+      // Wait for the video to be ready
+      await new Promise(resolve => {
+        video.onloadedmetadata = () => {
+          resolve(null);
+        };
+      });
       
-      setImage('https://placehold.co/400x300/4CAF50/FFFFFF?text=Plant+Image');
+      // Create a canvas to capture the image
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Draw the current video frame to the canvas
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Stop the camera stream
+      stream.getTracks().forEach(track => track.stop());
+      
+      // Convert the canvas to a base64 image
+      const base64Image = canvas.toDataURL('image/jpeg');
+      
+      setImage(base64Image);
       
       // Handle both callback types
       if (onImageSelected) {
-        onImageSelected(mockBase64Image);
+        onImageSelected(base64Image);
       } else if (onImageCaptured) {
-        await onImageCaptured(mockBase64Image);
+        await onImageCaptured(base64Image);
       }
     } catch (err) {
       console.error('Camera capture error:', err);
-      setError('Failed to capture image. Please try again.');
+      setError('Failed to capture image. Please try again or use the gallery option.');
     }
   };
 
@@ -59,23 +80,45 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     try {
       setError(null);
       
-      // In a real implementation, we would use react-native-image-picker or expo-image-picker
-      // For this demo, we'll simulate image selection with a placeholder
+      // Create a file input element
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
       
-      // Simulate gallery selection delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Handle file selection
+      input.onchange = async (event) => {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        
+        if (!file) {
+          setError('No image selected');
+          return;
+        }
+        
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          setError('Image too large. Please select an image under 5MB.');
+          return;
+        }
+        
+        // Read the file as a data URL (base64)
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const base64Image = e.target?.result as string;
+          setImage(base64Image);
+          
+          // Handle both callback types
+          if (onImageSelected) {
+            onImageSelected(base64Image);
+          } else if (onImageCaptured) {
+            await onImageCaptured(base64Image);
+          }
+        };
+        
+        reader.readAsDataURL(file);
+      };
       
-      // This would be the base64 string from the gallery
-      const mockBase64Image = 'mockBase64StringFromGallery';
-      
-      setImage('https://placehold.co/400x300/4CAF50/FFFFFF?text=Plant+Image');
-      
-      // Handle both callback types
-      if (onImageSelected) {
-        onImageSelected(mockBase64Image);
-      } else if (onImageCaptured) {
-        await onImageCaptured(mockBase64Image);
-      }
+      // Trigger the file input click
+      input.click();
     } catch (err) {
       console.error('Gallery pick error:', err);
       setError('Failed to select image. Please try again.');

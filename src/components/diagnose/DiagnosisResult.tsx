@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
-import ConfidenceMeter from '../ui/ConfidenceMeter';
+import { ConfidenceMeter } from '../ui/ConfidenceMeter';
+import VotingSystem from '../community/VotingSystem';
 
 interface Treatment {
   name: string;
@@ -53,14 +54,37 @@ export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
   isLoading = false,
   result,
 }) => {
+  // State for community-adjusted confidence score
+  const [adjustedConfidenceScore, setAdjustedConfidenceScore] = useState<number | null>(null);
   // Extract data from result prop if provided
-  const actualPlantType = plantType || (result?.plant_type || '');
-  const actualDiseaseName = diseaseName || (result?.disease_name || '');
-  const actualConfidenceScore = confidenceScore || (result?.confidence_score || 0);
+  const actualPlantType = plantType || (result?.plantType || result?.plant_type || '');
+  const actualDiseaseName = diseaseName || (result?.diseaseName || result?.disease_name || '');
+  
+  // Ensure confidence score is properly normalized between 0 and 1
+  let actualConfidenceScore = 0;
+  if (confidenceScore !== undefined) {
+    actualConfidenceScore = confidenceScore > 1 ? confidenceScore / 100 : confidenceScore;
+  } else if (result?.confidenceScore !== undefined) {
+    actualConfidenceScore = result.confidenceScore > 1 ? result.confidenceScore / 100 : result.confidenceScore;
+  } else if (result?.confidence !== undefined) {
+    actualConfidenceScore = result.confidence > 1 ? result.confidence / 100 : result.confidence;
+  } else if (result?.confidence_score !== undefined) {
+    actualConfidenceScore = result.confidence_score > 1 ? result.confidence_score / 100 : result.confidence_score;
+  }
+  
+  console.log('=== CONFIDENCE SCORE DEBUG ===');
+  console.log('Raw confidenceScore prop:', confidenceScore);
+  console.log('result object:', result);
+  console.log('result.confidenceScore:', result?.confidenceScore);
+  console.log('result.confidence:', result?.confidence);
+  console.log('result.confidence_score:', result?.confidence_score);
+  console.log('Final actualConfidenceScore:', actualConfidenceScore);
+  console.log('==============================');
+  
   const actualDescription = description || (result?.description || '');
   const actualOrganicTreatments = organicTreatments || (result?.organic_treatments || []);
   const actualChemicalTreatments = chemicalTreatments || (result?.chemical_treatments || []);
-  const actualPreventiveMeasures = preventiveMeasures || (result?.preventive_measures || []);
+  const actualPreventiveMeasures = preventiveMeasures || (result?.preventiveMeasures || result?.preventive_measures || []);
   
   // Determine if the diagnosis should be shared with the community based on confidence score
   const shouldShareWithCommunity = actualConfidenceScore < 0.8;
@@ -85,7 +109,25 @@ export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
               </View>
               
               <View style={styles.confidenceContainer}>
-                <ConfidenceMeter score={actualConfidenceScore} size="medium" />
+                <ConfidenceMeter 
+                  score={adjustedConfidenceScore !== null ? adjustedConfidenceScore : actualConfidenceScore} 
+                  size="medium" 
+                  showLabel={true} 
+                  showPercentage={true} 
+                />
+                {adjustedConfidenceScore !== null && adjustedConfidenceScore !== actualConfidenceScore && (
+                  <Text style={styles.communityAdjustedText}>
+                    Community adjusted: {Math.round((adjustedConfidenceScore - actualConfidenceScore) * 100) > 0 ? '+' : ''}
+                    {Math.round((adjustedConfidenceScore - actualConfidenceScore) * 100)}%
+                  </Text>
+                )}
+                
+                {/* Voting system directly below confidence meter */}
+                <VotingSystem 
+                  diagnosisId={result?.id || 'temp-id'} 
+                  initialConfidence={actualConfidenceScore}
+                  onConfidenceUpdate={setAdjustedConfidenceScore}
+                />
               </View>
             </View>
             
@@ -206,6 +248,8 @@ export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
               />
             )}
             
+            {/* Community voting system moved directly below confidence meter */}
+            
             {shouldShareWithCommunity && onCommunityVoting && (
               <View style={styles.communityShareContainer}>
                 <Text style={styles.communityShareText}>
@@ -230,6 +274,17 @@ export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  communityAdjustedText: {
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginTop: 5,
+    textAlign: 'center',
+    color: '#666666',
+  },
+  communityVotingContainer: {
+    marginTop: 10,
+    marginBottom: 10,
   },
   loadingContainer: {
     padding: 20,
@@ -270,7 +325,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   confidenceContainer: {
-    alignItems: 'flex-end',
+    alignItems: 'center',
+    width: '100%',
   },
   descriptionContainer: {
     marginBottom: 24,

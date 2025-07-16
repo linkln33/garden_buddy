@@ -76,6 +76,26 @@ export interface Database {
           status?: 'pending' | 'confirmed' | 'disputed'
         }
       }
+      cached_diagnoses: {
+        Row: {
+          id: string
+          diagnosis: Json
+          image_hash: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          diagnosis: Json
+          image_hash: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          diagnosis?: Json
+          image_hash?: string
+          created_at?: string
+        }
+      }
       treatments: {
         Row: {
           id: string
