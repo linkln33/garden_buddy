@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useIsDesktop } from '../../utils/responsive';
 import { View, Text, StyleSheet, Pressable, Animated } from 'react-native';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FaLeaf, FaUserCircle, FaTimes, FaBars } from 'react-icons/fa';
+import { FaLeaf, FaUserCircle, FaTimes, FaBars, FaBell } from 'react-icons/fa';
 import { createBrowserClient } from '@supabase/ssr';
 import type { Database } from '../../lib/supabase/types';
 
@@ -15,6 +16,10 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const isDesktop = useIsDesktop();
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createBrowserClient<Database>(
@@ -42,6 +47,48 @@ export default function Header() {
       authListener?.subscription.unsubscribe();
     };
   }, [supabase.auth]);
+
+  // Fetch notifications when user is logged in
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!user) return;
+      
+      try {
+        // Fetch weather alerts as notifications
+        const { data: weatherAlerts, error: weatherError } = await supabase
+          .from('weather_alerts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (weatherError) throw weatherError;
+        
+        // You can add more notification types here and combine them
+        setNotifications(weatherAlerts || []);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    if (user) {
+      fetchNotifications();
+      
+      // Set up real-time subscription for new notifications
+      const weatherSubscription = supabase
+        .channel('weather_alerts_channel')
+        .on('postgres_changes', 
+          { event: 'INSERT', schema: 'public', table: 'weather_alerts' }, 
+          (payload) => {
+            setNotifications(prev => [payload.new, ...prev].slice(0, 5));
+          }
+        )
+        .subscribe();
+        
+      return () => {
+        weatherSubscription.unsubscribe();
+      };
+    }
+  }, [user, supabase]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -100,30 +147,30 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <View style={styles.desktopNav}>
-            <Link href="/" passHref>
+          <View style={[styles.desktopNav, isDesktop && { display: 'flex' }]}>
+            <Link href="/" passHref style={{ textDecoration: 'none' }}>
               <Text style={[styles.navLink, pathname === '/' && styles.activeLink]}>
                 Home
               </Text>
             </Link>
             {user ? (
               <>
-                <Link href="/diagnose" passHref>
+                <Link href="/diagnose" passHref style={{ textDecoration: 'none' }}>
                   <Text style={[styles.navLink, pathname === '/diagnose' && styles.activeLink]}>
                     Diagnose
                   </Text>
                 </Link>
-                <Link href="/logbook" passHref>
+                <Link href="/logbook" passHref style={{ textDecoration: 'none' }}>
                   <Text style={[styles.navLink, pathname === '/logbook' && styles.activeLink]}>
                     Logbook
                   </Text>
                 </Link>
-                <Link href="/community" passHref>
+                <Link href="/community" passHref style={{ textDecoration: 'none' }}>
                   <Text style={[styles.navLink, pathname === '/community' && styles.activeLink]}>
                     Community
                   </Text>
                 </Link>
-                <Link href="/weather" passHref>
+                <Link href="/weather" passHref style={{ textDecoration: 'none' }}>
                   <Text style={[styles.navLink, pathname === '/weather' && styles.activeLink]}>
                     Weather
                   </Text>
@@ -131,12 +178,12 @@ export default function Header() {
               </>
             ) : (
               <>
-                <Link href="/about" passHref>
+                <Link href="/about" passHref style={{ textDecoration: 'none' }}>
                   <Text style={[styles.navLink, pathname === '/about' && styles.activeLink]}>
                     About
                   </Text>
                 </Link>
-                <Link href="/contact" passHref>
+                <Link href="/contact" passHref style={{ textDecoration: 'none' }}>
                   <Text style={[styles.navLink, pathname === '/contact' && styles.activeLink]}>
                     Contact
                   </Text>
@@ -146,27 +193,81 @@ export default function Header() {
           </View>
 
           {/* Auth Buttons (Desktop) */}
-          <View style={styles.desktopAuth}>
+          <View style={[styles.desktopAuth, isDesktop && { display: 'flex' }]}>
             {user ? (
               <>
-                <Link href="/profile" passHref>
-                  <View style={styles.profileButton}>
-                    <FaUserCircle size={20} color="#4CAF50" />
-                    <Text style={styles.profileText}>Profile</Text>
+                {/* Notifications Bell */}
+                <Pressable 
+                  style={styles.notificationButton} 
+                  onPress={() => setShowNotifications(!showNotifications)}
+                >
+                  <View style={styles.bellContainer}>
+                    <FaBell size={20} color="#4CAF50" />
+                    {notifications.length > 0 && (
+                      <View style={styles.notificationBadge}>
+                        <Text style={styles.badgeText}>{notifications.length}</Text>
+                      </View>
+                    )}
                   </View>
-                </Link>
-                <Pressable style={styles.logoutButton} onPress={handleLogout}>
-                  <Text style={styles.logoutText}>Logout</Text>
                 </Pressable>
+                
+                {/* Notifications Dropdown */}
+                {showNotifications && (
+                  <View style={styles.notificationsDropdown}>
+                    <Text style={styles.notificationsTitle}>Notifications</Text>
+                    {notifications.length > 0 ? (
+                      notifications.map((notification, index) => (
+                        <View key={notification.id} style={styles.notificationItem}>
+                          <Text style={styles.notificationText}>
+                            {notification.message || 'Weather alert: ' + notification.alert_type}
+                          </Text>
+                          <Text style={styles.notificationTime}>
+                            {new Date(notification.created_at).toLocaleDateString()}
+                          </Text>
+                        </View>
+                      ))
+                    ) : (
+                      <Text style={styles.noNotifications}>No new notifications</Text>
+                    )}
+                  </View>
+                )}
+                
+                <Pressable 
+                  style={styles.profileButton} 
+                  onPress={() => setShowProfileDropdown(!showProfileDropdown)}
+                >
+                  <FaUserCircle size={20} color="#4CAF50" />
+                  <Text style={styles.profileText}>Profile</Text>
+                </Pressable>
+                
+                {/* Profile Dropdown */}
+                {showProfileDropdown && (
+                  <View style={styles.profileDropdown}>
+                    <Text style={styles.welcomeText}>Welcome back, {user?.email?.split('@')[0] || 'User'}</Text>
+                    <Link href="/profile" passHref style={{ textDecoration: 'none' }}>
+                      <View style={styles.dropdownItem}>
+                        <Text style={styles.dropdownItemText}>My Profile</Text>
+                      </View>
+                    </Link>
+                    <Link href="/settings" passHref style={{ textDecoration: 'none' }}>
+                      <View style={styles.dropdownItem}>
+                        <Text style={styles.dropdownItemText}>Settings</Text>
+                      </View>
+                    </Link>
+                    <Pressable style={styles.dropdownItem} onPress={handleLogout}>
+                      <Text style={[styles.dropdownItemText, styles.logoutText]}>Logout</Text>
+                    </Pressable>
+                  </View>
+                )}
               </>
             ) : (
               <>
-                <Link href="/login" passHref>
+                <Link href="/login" passHref style={{ textDecoration: 'none' }}>
                   <View style={styles.loginButton}>
                     <Text style={styles.loginText}>Login</Text>
                   </View>
                 </Link>
-                <Link href="/register" passHref>
+                <Link href="/register" passHref style={{ textDecoration: 'none' }}>
                   <View style={styles.registerButton}>
                     <Text style={styles.registerText}>Sign Up</Text>
                   </View>
@@ -177,7 +278,7 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <Pressable 
-            style={styles.menuButton} 
+            style={[styles.menuButton, isDesktop && { display: 'none' }]} 
             onPress={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? 
@@ -195,7 +296,7 @@ export default function Header() {
           {
             height: menuHeight,
             opacity: menuOpacity,
-            display: isMenuOpen ? 'flex' : 'none',
+            display: (isMenuOpen && !isDesktop) ? 'flex' : 'none',
           },
         ]}
       >
@@ -365,6 +466,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 16,
+    position: 'relative' as 'relative',
+    cursor: 'pointer',
   },
   profileText: {
     fontSize: 16,
@@ -434,11 +537,108 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F0F0F0',
   },
   mobileLogoutLink: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#F44336',
+    fontWeight: '600',
+    paddingVertical: 12,
+  },
+  notificationButton: {
+    marginRight: 16,
+    position: 'relative',
+  },
+  bellContainer: {
+    position: 'relative',
+    padding: 8,
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: '#FF5252',
+    borderRadius: 10,
+    width: 16,
+    height: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  notificationsDropdown: {
+    position: 'absolute',
+    top: 60,
+    right: 80,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    width: 300,
+    maxHeight: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 1000,
+    padding: 16,
+  },
+  notificationsTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#333333',
+  },
+  profileDropdown: {
+    position: 'absolute',
+    top: 45,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#EEEEEE',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    padding: 12,
+    zIndex: 1000,
+    minWidth: 200,
+  },
+  welcomeText: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEEEEE',
+  },
+  dropdownItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  dropdownItemText: {
+    fontSize: 14,
+    color: '#333333',
+  },
+  notificationItem: {
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
-    fontWeight: '600',
   },
+  notificationText: {
+    fontSize: 14,
+    color: '#333333',
+    marginBottom: 4,
+  },
+  notificationTime: {
+    fontSize: 12,
+    color: '#999999',
+  },
+  noNotifications: {
+    fontSize: 14,
+    color: '#999999',
+    textAlign: 'center',
+    paddingVertical: 16,
+  }
 });

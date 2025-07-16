@@ -31,6 +31,7 @@ interface DiagnosisResultProps {
   isSharing?: boolean;
   isLoading?: boolean;
   result?: any;
+  confidenceMeterSize?: 'small' | 'medium' | 'large';
 }
 
 /**
@@ -53,6 +54,7 @@ export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
   isSharing = false,
   isLoading = false,
   result,
+  confidenceMeterSize = 'medium',
 }) => {
   // State for community-adjusted confidence score
   const [adjustedConfidenceScore, setAdjustedConfidenceScore] = useState<number | null>(null);
@@ -111,7 +113,7 @@ export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
               <View style={styles.confidenceContainer}>
                 <ConfidenceMeter 
                   score={adjustedConfidenceScore !== null ? adjustedConfidenceScore : actualConfidenceScore} 
-                  size="medium" 
+                  size={confidenceMeterSize} 
                   showLabel={true} 
                   showPercentage={true} 
                 />
@@ -301,9 +303,11 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 200,
+    height: 'auto',
+    aspectRatio: 16/9,
     borderRadius: 8,
-    resizeMode: 'cover',
+    resizeMode: 'contain',
+    backgroundColor: '#f0f0f0',
   },
   resultHeader: {
     flexDirection: 'row',

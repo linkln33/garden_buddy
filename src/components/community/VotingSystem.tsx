@@ -28,27 +28,21 @@ export const VotingSystem: React.FC<VotingSystemProps> = ({
   useEffect(() => {
     const fetchVotes = async () => {
       try {
-        // Get total upvotes (value = true)
-        const { data: upvoteData, error: upvoteError } = await supabase
+        // Count all votes for this diagnosis
+        const { data: votesData, error: votesError } = await supabase
           .from('community_votes')
-          .select('count')
-          .eq('diagnosis_id', diagnosisId)
-          .eq('vote_value', true);
+          .select('id, voted_disease')
+          .eq('diagnosis_id', diagnosisId);
           
-        // Get total downvotes (value = false)
-        const { data: downvoteData, error: downvoteError } = await supabase
-          .from('community_votes')
-          .select('count')
-          .eq('diagnosis_id', diagnosisId)
-          .eq('vote_value', false);
-          
-        if (upvoteError || downvoteError) {
-          console.error('Error fetching votes:', upvoteError || downvoteError);
+        if (votesError) {
+          console.error('Error fetching votes:', votesError);
           return;
         }
         
-        const upCount = upvoteData?.[0]?.count || 0;
-        const downCount = downvoteData?.[0]?.count || 0;
+        // For now, we'll consider any vote as an upvote since the schema doesn't have vote_value
+        // In a real app, we'd need to modify the schema to include vote direction
+        const upCount = votesData?.length || 0;
+        const downCount = 0; // No downvotes in current schema
         
         setUpvotes(upCount);
         setDownvotes(downCount);
@@ -61,13 +55,14 @@ export const VotingSystem: React.FC<VotingSystemProps> = ({
         if (userSession?.session?.user) {
           const { data: userVoteData } = await supabase
             .from('community_votes')
-            .select('vote_value')
+            .select('id, voted_disease')
             .eq('diagnosis_id', diagnosisId)
             .eq('user_id', userSession.session.user.id)
-            .single();
+            .maybeSingle();
             
           if (userVoteData) {
-            setUserVote(userVoteData.vote_value ? 'up' : 'down');
+            // If the user has voted, consider it an upvote for now
+            setUserVote('up');
           }
         }
       } catch (error) {
@@ -104,87 +99,87 @@ export const VotingSystem: React.FC<VotingSystemProps> = ({
   };
   
   const handleVote = async (isUpvote: boolean) => {
+    // For now, we only support upvotes based on the current schema
+    if (!isUpvote) {
+      console.log('Downvoting not supported in current schema');
+      return;
+    }
+    
+    setIsLoading(true);
+    
     try {
-      setIsLoading(true);
-      
-      // Check if user is authenticated
+      // Get user session
       const { data: userSession } = await supabase.auth.getSession();
       if (!userSession?.session?.user) {
-        alert('You need to be logged in to vote');
-        setIsLoading(false);
+        console.error('User must be logged in to vote');
         return;
       }
       
       const userId = userSession.session.user.id;
       
       // Check if user has already voted
-      const { data: existingVote } = await supabase
+      const { data: existingVote, error: checkError } = await supabase
         .from('community_votes')
         .select('*')
         .eq('diagnosis_id', diagnosisId)
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
+        
+      if (checkError) {
+        console.error('Error checking existing vote:', checkError);
+        return;
+      }
       
+      // If user has already voted
       if (existingVote) {
-        // User is changing their vote
-        if ((existingVote.vote_value && !isUpvote) || (!existingVote.vote_value && isUpvote)) {
-          await supabase
-            .from('community_votes')
-            .update({ vote_value: isUpvote })
-            .eq('id', existingVote.id);
-          
-          // Update local state
-          if (isUpvote) {
-            setUpvotes(prev => prev + 1);
-            setDownvotes(prev => prev - 1);
-          } else {
-            setUpvotes(prev => prev - 1);
-            setDownvotes(prev => prev + 1);
-          }
-        }
         // User is clicking the same vote again (unvote)
-        else {
-          await supabase
-            .from('community_votes')
-            .delete()
-            .eq('id', existingVote.id);
-          
-          // Update local state
-          if (isUpvote) {
-            setUpvotes(prev => prev - 1);
-          } else {
-            setDownvotes(prev => prev - 1);
-          }
-          setUserVote(null);
-        }
-      } else {
-        // New vote
         await supabase
+          .from('community_votes')
+          .delete()
+          .eq('id', existingVote.id);
+        
+        // Update local state
+        setUpvotes(prev => prev - 1);
+        setUserVote(null);
+      } else {
+        // New vote - get the disease name from the diagnosis
+        const { data: diagnosisData, error: diagnosisError } = await supabase
+          .from('diagnoses')
+          .select('disease_name')
+          .eq('id', diagnosisId)
+          .single();
+          
+        if (diagnosisError || !diagnosisData) {
+          console.error('Could not find diagnosis:', diagnosisError);
+          return;
+        }
+        
+        // New vote
+        const { error: insertError } = await supabase
           .from('community_votes')
           .insert({
             diagnosis_id: diagnosisId,
             user_id: userId,
-            vote_value: isUpvote
+            voted_disease: diagnosisData.disease_name // Use the disease name from the diagnosis
           });
+          
+        if (insertError) {
+          console.error('Error inserting vote:', insertError);
+          return;
+        }
         
         // Update local state
-        if (isUpvote) {
-          setUpvotes(prev => prev + 1);
-          setUserVote('up');
-        } else {
-          setDownvotes(prev => prev + 1);
-          setUserVote('down');
-        }
+        setUpvotes(prev => prev + 1);
+        setUserVote('up');
       }
       
-      // Update confidence score
+      // Update confidence score based on new vote counts
       const newUpvotes = isUpvote ? upvotes + 1 : upvotes - (userVote === 'up' ? 1 : 0);
       const newDownvotes = !isUpvote ? downvotes + 1 : downvotes - (userVote === 'down' ? 1 : 0);
       updateConfidenceScore(newUpvotes, newDownvotes);
       
     } catch (error) {
       console.error('Error voting:', error);
-      alert('Failed to register your vote. Please try again.');
     } finally {
       setIsLoading(false);
     }

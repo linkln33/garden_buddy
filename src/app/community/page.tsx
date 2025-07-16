@@ -38,18 +38,18 @@ export default function CommunityPage() {
             plant_type,
             disease_name,
             confidence_score,
-            description,
             image_url,
             created_at,
             status,
+            user_id,
+            ai_diagnosis,
             community_votes:community_votes(
               id,
               diagnosis_id,
-              vote_option,
+              voted_disease,
               created_at
             )
           `)
-          .eq('status', 'pending')
           .lt('confidence_score', 80)
           .order('created_at', { ascending: false });
         
@@ -60,23 +60,29 @@ export default function CommunityPage() {
         // Fetch user's votes
         const { data: userVotesData, error: userVotesError } = await supabase
           .from('community_votes')
-          .select('diagnosis_id, vote_option')
+          .select('diagnosis_id, voted_disease')
           .eq('user_id', session.user.id);
         
         if (userVotesError) {
           throw userVotesError;
         }
         
-        // Create a map of diagnosis_id to vote_option
+        // Create a map of diagnosis_id to voted_disease
         const votesMap: Record<string, string> = {};
         userVotesData.forEach((vote) => {
-          votesMap[vote.diagnosis_id] = vote.vote_option;
+          votesMap[vote.diagnosis_id] = vote.voted_disease;
         });
         
         setUserVotes(votesMap);
         setDiagnoses(diagnosesData || []);
       } catch (err) {
         console.error('Error fetching community diagnoses:', err);
+        // Log detailed error information
+        if (err && typeof err === 'object') {
+          if ('code' in err) console.error('Error code:', err.code);
+          if ('message' in err) console.error('Error message:', err.message);
+          if ('details' in err) console.error('Error details:', err.details);
+        }
         setError('Failed to load community diagnoses');
       } finally {
         setLoading(false);
@@ -104,7 +110,7 @@ export default function CommunityPage() {
         // Update existing vote
         const { error } = await supabase
           .from('community_votes')
-          .update({ vote_option: voteOption })
+          .update({ voted_disease: voteOption })
           .eq('diagnosis_id', diagnosisId)
           .eq('user_id', session.user.id);
         
@@ -118,7 +124,7 @@ export default function CommunityPage() {
           .insert({
             diagnosis_id: diagnosisId,
             user_id: session.user.id,
-            vote_option: voteOption,
+            voted_disease: voteOption,
           });
         
         if (error) {

@@ -24,3 +24,49 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Responsive styles */
+@media (min-width: 768px) {
+  .desktop-nav {
+    display: flex !important;
+  }
+  
+  .desktop-auth {
+    display: flex !important;
+  }
+  
+  .menu-button {
+    display: none !important;
+  }
+  
+  .hero-container {
+    flex-direction: row !important;
+  }
+  
+  .hero-content {
+    padding-right: 24px !important;
+  }
+  
+  .features-grid {
+    flex-direction: row !important;
+  }
+  
+  .steps-container {
+    flex-direction: row !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-container {
+    flex-direction: column-reverse !important;
+  }
+  
+  .hero-image-container {
+    margin-bottom: 24px !important;
+  }
+  
+  .step-arrow {
+    transform: rotate(90deg) !important;
+    margin: 8px 0 !important;
+  }
+}

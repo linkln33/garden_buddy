@@ -3,7 +3,7 @@ import { Pressable, Text, ActivityIndicator, StyleSheet, ViewStyle } from 'react
 
 export interface ButtonProps {
   onPress: () => void;
-  title: string;
+  title?: string;
   variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'text';
   size?: 'small' | 'medium' | 'large';
   fullWidth?: boolean;
@@ -113,18 +113,20 @@ export const Button: React.FC<ButtonProps> = ({
       ) : (
         <React.Fragment>
           {icon && <Text style={styles.icon}>{icon}</Text>}
-          <Text
-            style={[
-              styles.text,
-              {
-                color: getTextColor(),
-                fontSize: getFontSize(),
-                marginLeft: icon ? 8 : 0,
-              },
-            ]}
-          >
-            {title}
-          </Text>
+          {title && (
+            <Text
+              style={[
+                styles.text,
+                {
+                  color: getTextColor(),
+                  fontSize: getFontSize(),
+                  marginLeft: icon ? 8 : 0,
+                },
+              ]}
+            >
+              {title}
+            </Text>
+          )}
         </React.Fragment>
       )}
     </Pressable>

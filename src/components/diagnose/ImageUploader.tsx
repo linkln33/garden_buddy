@@ -11,6 +11,8 @@ interface ImageUploaderProps {
   isUploading?: boolean;
   isLoading?: boolean;
   error?: string | null;
+  compact?: boolean; // New prop for compact mode in dashboard
+  hidePreview?: boolean; // New prop to hide the image preview
 }
 
 /**
@@ -22,6 +24,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   isUploading = false,
   isLoading = false,
   error: propError = null,
+  compact = false,
+  hidePreview = false,
 }) => {
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(propError);
@@ -132,64 +136,74 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Upload Plant Image</Text>
-      <Text style={styles.subtitle}>
-        Take a clear photo of the plant leaf to diagnose any diseases
-      </Text>
-
-      {!image ? (
+    <View style={[styles.container, compact && styles.compactContainer]}>
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+      
+      {image && !hidePreview ? (
+        <View style={styles.imagePreviewContainer}>
+          <Image 
+            source={{ uri: image }} 
+            style={styles.imagePreview} 
+            resizeMode="cover"
+          />
+          <Pressable 
+            style={styles.removeButton}
+            onPress={handleClearImage}
+          >
+            <FaTimesCircle color="#ff4d4d" size={24} />
+          </Pressable>
+        </View>
+      ) : (
         <View style={styles.uploadContainer}>
-          <View style={styles.dottedBorder}>
-            <FaLeaf size={48} color="#4CAF50" />
-            <Text style={styles.uploadText}>
-              Take a photo or select from gallery
-            </Text>
-            
-            <View style={styles.buttonContainer}>
-              <Button
-                title="Camera"
-                onPress={handleCameraCapture}
-                variant="primary"
-                size="medium"
-                icon={<FaCamera size={16} color="#FFFFFF" />}
-              />
-              <Button
-                title="Gallery"
-                onPress={handleGalleryPick}
-                variant="outline"
-                size="medium"
-                icon={<FaImage size={16} color="#4CAF50" />}
-              />
+          <View style={styles.buttonContainer}>
+            <Button 
+              onPress={handleCameraCapture}
+              title="Take Photo"
+              icon={<FaCamera size={16} />}
+              disabled={isUploading || isLoading}
+              style={styles.uploadButton}
+            />
+            <Button 
+              onPress={handleGalleryPick}
+              title="Upload Image"
+              icon={<FaImage size={16} />}
+              disabled={isUploading || isLoading}
+              style={styles.uploadButton}
+            />
+          </View>
+          
+          <View style={styles.tipsContainer}>
+            <Text style={styles.tipsTitle}>Tips for best results:</Text>
+            <View style={styles.tipRow}>
+              <FaLeaf color="#4CAF50" size={12} style={styles.tipIcon} />
+              <Text style={styles.tipText}>Take a clear, well-lit photo</Text>
+            </View>
+            <View style={styles.tipRow}>
+              <FaLeaf color="#4CAF50" size={12} style={styles.tipIcon} />
+              <Text style={styles.tipText}>Focus on the affected area</Text>
+            </View>
+            <View style={styles.tipRow}>
+              <FaLeaf color="#4CAF50" size={12} style={styles.tipIcon} />
+              <Text style={styles.tipText}>Include some healthy parts for comparison</Text>
+            </View>
+            <View style={styles.tipRow}>
+              <FaLeaf color="#4CAF50" size={12} style={styles.tipIcon} />
+              <Text style={styles.tipText}>Avoid shadows and glare</Text>
             </View>
           </View>
         </View>
-      ) : (
-        <View style={styles.imagePreviewContainer}>
-          <Image source={{ uri: image }} style={styles.imagePreview} />
-          
-          {isUploading ? (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#4CAF50" />
-              <Text style={styles.loadingText}>Analyzing image...</Text>
-            </View>
-          ) : (
-            <Pressable style={styles.clearButton} onPress={handleClearImage}>
-              <FaTimesCircle size={24} color="#F44336" />
-            </Pressable>
-          )}
+      )}
+      
+      {isUploading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#4CAF50" />
+          <Text style={styles.loadingText}>Analyzing image...</Text>
         </View>
       )}
-
-      {error && <Text style={styles.errorText}>{error}</Text>}
-
-      <View style={styles.tipsContainer}>
-        <Text style={styles.tipsTitle}>Tips for best results:</Text>
-        <Text style={styles.tipItem}>• Take a clear, well-lit photo</Text>
-        <Text style={styles.tipItem}>• Focus on the affected area</Text>
-        <Text style={styles.tipItem}>• Include some healthy parts for comparison</Text>
-        <Text style={styles.tipItem}>• Avoid shadows and glare</Text>
-      </View>
     </View>
   );
 };
@@ -198,55 +212,72 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
   },
+  compactContainer: {
+    padding: 8,
+  },
+  compactTipsContainer: {
+    marginTop: 8,
+    paddingHorizontal: 8,
+  },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
-    color: '#333333',
+    color: '#333',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666666',
-    marginBottom: 24,
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 16,
   },
   uploadContainer: {
-    marginVertical: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 16,
   },
   dottedBorder: {
     borderWidth: 2,
-    borderColor: '#4CAF50',
     borderStyle: 'dashed',
-    borderRadius: 12,
-    padding: 32,
+    borderColor: '#4CAF50',
+    borderRadius: 8,
+    padding: 24,
     alignItems: 'center',
-    justifyContent: 'center',
+    width: '100%',
   },
   uploadText: {
-    fontSize: 16,
-    color: '#666666',
     marginTop: 16,
-    marginBottom: 24,
+    marginBottom: 16,
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
   buttonContainer: {
     flexDirection: 'row',
-    gap: 16,
+    justifyContent: 'space-around',
+    width: '100%',
+    marginTop: 8,
   },
   imagePreviewContainer: {
-    marginVertical: 16,
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    overflow: 'hidden',
     position: 'relative',
+    marginBottom: 16,
   },
   imagePreview: {
     width: '100%',
-    height: 300,
-    borderRadius: 12,
-    resizeMode: 'cover',
+    height: '100%',
   },
   clearButton: {
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 20,
     padding: 4,
   },
   loadingOverlay: {
@@ -255,38 +286,66 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 12,
+    zIndex: 10,
   },
   loadingText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 16,
+    marginTop: 8,
+    fontSize: 14,
+    color: '#4CAF50',
   },
   errorText: {
     color: '#F44336',
+    marginBottom: 8,
     fontSize: 14,
-    marginTop: 8,
   },
   tipsContainer: {
-    backgroundColor: '#F1F8E9',
-    padding: 16,
+    backgroundColor: '#f5f9f5',
+    padding: 12,
     borderRadius: 8,
-    marginTop: 24,
+    marginTop: 16,
   },
   tipsTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#4CAF50',
     marginBottom: 8,
   },
   tipItem: {
-    fontSize: 14,
-    color: '#666666',
+    fontSize: 12,
+    color: '#666',
     marginBottom: 4,
+  },
+  errorContainer: {
+    backgroundColor: '#FFEBEE',
+    padding: 8,
+    borderRadius: 4,
+    marginBottom: 12,
+  },
+  removeButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 20,
+    padding: 4,
+  },
+  uploadButton: {
+    marginHorizontal: 4,
+  },
+  tipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  tipIcon: {
+    marginRight: 6,
+  },
+  tipText: {
+    fontSize: 12,
+    color: '#666',
   },
 });
 

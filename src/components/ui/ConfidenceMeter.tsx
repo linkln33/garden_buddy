@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 interface ConfidenceMeterProps {
   score: number; // Score between 0 and 1
@@ -23,51 +23,58 @@ export const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({
   // Convert score to percentage
   const percentage = Math.round(normalizedScore * 100);
   
-  // Determine color based on confidence level
+  // Determine color based on confidence level - divided into 4 parts
   const getColor = () => {
-    if (percentage >= 80) return '#4CAF50'; // Green for high confidence
-    if (percentage >= 60) return '#FFC107'; // Yellow for medium confidence
-    return '#F44336'; // Red for low confidence
+    if (percentage >= 75) return '#4CAF50'; // Green for high confidence (75-100%)
+    if (percentage >= 50) return '#CDDC39'; // Lime for medium-high confidence (50-75%)
+    if (percentage >= 25) return '#FF9800'; // Orange for medium-low confidence (25-50%)
+    return '#F44336'; // Red for low confidence (0-25%)
   };
 
-  // Get gradient colors for meter
-  const getGradientColors = () => {
-    return [
-      { color: '#F44336', position: 0 },    // Red (low)
-      { color: '#FF9800', position: 0.3 },  // Orange (low-medium)
-      { color: '#FFC107', position: 0.6 },  // Yellow (medium)
-      { color: '#8BC34A', position: 0.8 },  // Light green (medium-high)
-      { color: '#4CAF50', position: 1 }     // Green (high)
-    ];
+  // Define the colors for the meter sections
+  const meterColors = {
+    low: '#F44336',      // Red (0-25%)
+    mediumLow: '#FF9800', // Orange (25-50%)
+    mediumHigh: '#CDDC39', // Lime yellow green (50-75%)
+    high: '#4CAF50'      // Green (75-100%)
   };
   
-  // Determine label based on confidence level
+  // Determine label based on confidence level - divided into 4 parts
   const getLabel = () => {
-    if (percentage >= 80) return 'High Confidence';
-    if (percentage >= 60) return 'Medium Confidence';
-    return 'Low Confidence';
+    if (percentage >= 75) return 'High Confidence';
+    if (percentage >= 50) return 'Medium Confidence';
+    if (percentage >= 25) return 'Low Confidence';
+    return 'Very Low Confidence';
   };
   
-  // Define sizes based on prop
-  let meterHeight = 10;
-  let fontSize = 14;
-  let labelSize = 12;
+  // Define sizes based on prop - match the width of the image container
+  let meterHeight = 15;
+  let fontSize = 16;
+  let labelSize = 14;
   
-  // Make meter width responsive to container width
-  let meterWidth = Dimensions.get('window').width - 40; // Full width minus padding
+  // Use fixed numeric width for calculations
+  let meterWidth = 300; // Default medium size
   
   if (size === 'small') {
-    meterHeight = 8;
-    fontSize = 12;
-    labelSize = 10;
-  } else if (size === 'large') {
     meterHeight = 12;
+    fontSize = 14;
+    labelSize = 12;
+    meterWidth = 240;
+  } else if (size === 'medium') {
+    meterHeight = 15;
     fontSize = 16;
     labelSize = 14;
+    meterWidth = 300;
+  } else if (size === 'large') {
+    meterHeight = 20;
+    fontSize = 18;
+    labelSize = 16;
+    meterWidth = 400;
   }
   const color = getColor();
-  const gradientColors = getGradientColors();
 
+  // We no longer need the renderTicks function as we've removed the ticks for a cleaner design
+  
 
   return (
     <View style={styles.container}>
@@ -79,65 +86,40 @@ export const ConfidenceMeter: React.FC<ConfidenceMeterProps> = ({
       )}
       
       {/* Colorful Meter */}
-      <View style={[styles.meterContainer, { width: meterWidth }]}>
-        {/* Gradient Background */}
-        <View style={[styles.meterBackground, { height: meterHeight }]}>
-          <View style={styles.gradientContainer}>
-            {gradientColors.map((gc, index) => (
-              <View 
-                key={index}
-                style={[
-                  styles.gradientSegment,
-                  { 
-                    backgroundColor: gc.color,
-                    left: gc.position * meterWidth,
-                    width: index < gradientColors.length - 1 
-                      ? (gradientColors[index+1].position - gc.position) * meterWidth 
-                      : 0,
-                    height: meterHeight
-                  }
-                ]}
-              />
-            ))}
-          </View>
+      <View style={[styles.meterContainer, { width: '100%' }]}>
+        {/* Meter with 4 distinct color sections */}
+        <View style={[styles.meterBackground, { width: '100%', height: meterHeight }]}>
+          {/* Red section (0-25%) */}
+          <View style={[styles.meterSection, { width: '25%', backgroundColor: '#F44336' }]} />
+          {/* Orange section (25-50%) */}
+          <View style={[styles.meterSection, { width: '25%', backgroundColor: '#FF9800' }]} />
+          {/* Lime yellow green section (50-75%) */}
+          <View style={[styles.meterSection, { width: '25%', backgroundColor: '#CDDC39' }]} />
+          {/* Green section (75-100%) */}
+          <View style={[styles.meterSection, { width: '25%', backgroundColor: '#4CAF50' }]} />
         </View>
         
-        {/* Tick marks */}
-        <View style={styles.tickContainer}>
-          {[0, 25, 50, 75, 100].map(tick => (
-            <View 
-              key={tick} 
-              style={[
-                styles.tick, 
-                { 
-                  left: (tick / 100) * meterWidth, 
-                  height: meterHeight / 2,
-                  top: meterHeight
-                }
-              ]}
-            />
-          ))}
-        </View>
-        
-        {/* Needle */}
+        {/* Single Needle */}
+        {/* Needle indicator - positioned using absolute positioning */}
         <View 
-          style={[
-            styles.needle, 
-            { 
-              left: (percentage / 100) * meterWidth, 
-              height: meterHeight * 2,
-              top: -meterHeight / 2
-            }
-          ]}
+          style={[styles.needleContainer, { left: `${percentage}%` }]}
         >
-          <View style={[styles.needleHead, { backgroundColor: color }]} />
+          <View 
+            style={[
+              styles.needleLine,
+              { height: meterHeight }
+            ]}
+          />
+          <View style={styles.needleHead} />
         </View>
       </View>
       
       {/* Label */}
       {showLabel && (
-        <Text style={[styles.label, { fontSize: labelSize, color }]}>
-          {getLabel()}
+        <Text style={[styles.label, { fontSize: fontSize, color }]}>
+          {percentage >= 75 ? 'High Confidence' : 
+           percentage >= 50 ? 'Medium Confidence' : 
+           percentage >= 25 ? 'Low Confidence' : 'Very Low Confidence'}
         </Text>
       )}
     </View>
@@ -162,45 +144,38 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   meterBackground: {
-    borderRadius: 10,
+    height: 20,
+    backgroundColor: '#E0E0E0',
     overflow: 'hidden',
-    position: 'relative',
-  },
-  gradientContainer: {
     flexDirection: 'row',
+  },
+  meterSection: {
+    height: '100%',
+    minWidth: 30,
+  },
+  // Needle styles
+  needleContainer: {
     position: 'absolute',
-    left: 0,
-    right: 0,
     top: 0,
-    bottom: 0,
-  },
-  gradientSegment: {
-    position: 'absolute',
     height: '100%',
+    transform: [{ translateX: -1 }],
+    zIndex: 10,
+    alignItems: 'center',
   },
-  tickContainer: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-  },
-  tick: {
-    position: 'absolute',
-    width: 1,
-    backgroundColor: 'rgba(255,255,255,0.7)',
-  },
-  needle: {
-    position: 'absolute',
+  needleLine: {
     width: 2,
     backgroundColor: '#333',
-    transform: [{ translateX: -1 }],
   },
   needleHead: {
     position: 'absolute',
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    top: 0,
-    left: -3,
+    top: -6,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#333',
+    borderWidth: 1,
+    borderColor: '#fff',
+    transform: [{ translateX: -5 }],
   },
   label: {
     fontWeight: '600',

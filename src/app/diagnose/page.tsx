@@ -17,7 +17,7 @@ export default function DiagnosePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [diagnosisResult, setDiagnosisResult] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [aiProvider, setAiProvider] = useState<'hybrid' | 'claude' | 'openai'>('hybrid');
+  const [aiProvider, setAiProvider] = useState<'hybrid' | 'claude' | 'openai' | 'perplexity'>('hybrid');
   const [plantType, setPlantType] = useState<string>('');
   const router = useRouter();
   const supabase = createBrowserClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
@@ -37,6 +37,7 @@ export default function DiagnosePage() {
       // Determine API endpoint based on selected provider
       let apiEndpoint = aiProvider === 'openai' ? '/api/openai' : 
                        aiProvider === 'claude' ? '/api/claude' : 
+                       aiProvider === 'perplexity' ? '/api/perplexity' :
                        '/api/diagnose-hybrid';
       
       console.log('Using AI provider:', aiProvider);
@@ -143,6 +144,7 @@ export default function DiagnosePage() {
         confidence_score: diagnosis.confidenceScore,
         description: diagnosis.description,
         image_url: publicUrl,
+        ai_diagnosis: diagnosis, // Store the full diagnosis result as JSONB
         status: diagnosis.confidenceScore >= 80 ? 'confirmed' : 'pending',
       });
 
@@ -151,6 +153,12 @@ export default function DiagnosePage() {
       }
     } catch (err) {
       console.error('Error saving diagnosis to database:', err);
+      // Log detailed error information
+      if (err && typeof err === 'object') {
+        if ('code' in err) console.error('Error code:', err.code);
+        if ('message' in err) console.error('Error message:', err.message);
+        if ('details' in err) console.error('Error details:', err.details);
+      }
       // We don't set UI error here since the diagnosis was successful
       // and only the saving failed
     }
@@ -193,6 +201,7 @@ export default function DiagnosePage() {
       // Determine API endpoint based on selected provider
       let apiEndpoint = aiProvider === 'openai' ? '/api/openai' : 
                        aiProvider === 'claude' ? '/api/claude' : 
+                       aiProvider === 'perplexity' ? '/api/perplexity' :
                        '/api/diagnose-hybrid';
       
       console.log('Retrying with AI provider:', aiProvider);
@@ -317,6 +326,12 @@ export default function DiagnosePage() {
                 <Text style={styles.providerButtonText}>Claude AI</Text>
               </TouchableOpacity>
               <TouchableOpacity 
+                style={[styles.providerButton, aiProvider === 'perplexity' && styles.selectedProvider]}
+                onPress={() => setAiProvider('perplexity')}
+              >
+                <Text style={styles.providerButtonText}>Perplexity AI</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
                 style={[styles.providerButton, aiProvider === 'openai' && styles.selectedProvider]}
                 onPress={() => setAiProvider('openai')}
               >
@@ -325,7 +340,8 @@ export default function DiagnosePage() {
             </View>
             <Text style={styles.providerDescription}>
               {aiProvider === 'hybrid' && '🆓 Uses our plant disease database - works offline, instant results'}
-              {aiProvider === 'claude' && '💰 Claude AI vision analysis - requires API credits, very accurate'}
+              {aiProvider === 'claude' && '🆓 Claude AI vision analysis - requires API key, very accurate'}
+              {aiProvider === 'perplexity' && '🆓 Up-to-date plant information - uses web search, most current data'}
               {aiProvider === 'openai' && '💰 Premium AI vision analysis - requires OpenAI API key, most accurate'}
             </Text>
           </View>

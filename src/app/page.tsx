@@ -4,6 +4,8 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
+import { useIsDesktop } from '../utils/responsive';
+import ResponsiveContainer from '../components/layout/ResponsiveContainer';
 import { FaLeaf, FaSearch, FaCloudSun, FaUsers, FaBook, FaArrowRight, FaChartBar } from 'react-icons/fa';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
@@ -17,6 +19,7 @@ import type { Database } from '../lib/supabase/types';
 export default function Home() {
   const [user, setUser] = React.useState<any | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const isDesktop = useIsDesktop();
   const router = useRouter();
   const supabase = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -79,38 +82,43 @@ export default function Home() {
     <ScrollView style={styles.container}>
       {/* Hero Section */}
       <View style={styles.hero}>
-        <View style={styles.heroContent}>
-          <View style={styles.logoContainer}>
-            <FaLeaf size={48} color="#4CAF50" />
-            <Text style={styles.logoText}>Garden Buddy</Text>
+        <ResponsiveContainer>
+        <View style={[styles.heroInner, isDesktop ? { flexDirection: 'row' } : { flexDirection: 'column-reverse' }]}>
+          <View style={[styles.heroContent, isDesktop && { paddingRight: 48, flex: 1 }]}>
+            <View style={styles.logoContainer}>
+              <FaLeaf size={48} color="#4CAF50" />
+              <Text style={styles.logoText}>Garden Buddy</Text>
+            </View>
+            <Text style={[styles.heroTitle, isDesktop && { fontSize: 48, lineHeight: 56 }]}>Your AI-Powered Smart Farming Assistant</Text>
+            <Text style={styles.heroSubtitle}>
+              Detect plant diseases, get treatment recommendations, and monitor weather conditions for optimal plant health.
+            </Text>
+            <Button
+              title="Get Started"
+              onPress={handleDiagnoseClick}
+              variant="primary"
+              size="large"
+              icon={<FaArrowRight size={16} color="#FFFFFF" />}
+            />
           </View>
-          <Text style={styles.heroTitle}>Your AI-Powered Smart Farming Assistant</Text>
-          <Text style={styles.heroSubtitle}>
-            Detect plant diseases, get treatment recommendations, and monitor weather conditions for optimal plant health.
-          </Text>
-          <Button
-            title="Get Started"
-            onPress={handleDiagnoseClick}
-            variant="primary"
-            size="large"
-            icon={<FaArrowRight size={16} color="#FFFFFF" />}
-          />
+          <View style={[styles.heroImageContainer, isDesktop ? { flex: 1 } : { marginBottom: 32 }]}>
+            <Image
+              src="/images/plant-hero.jpg"
+              alt="Healthy plants"
+              width={isDesktop ? 600 : 400}
+              height={isDesktop ? 400 : 240}
+              style={styles.heroImage}
+            />
+          </View>
         </View>
-        <View style={styles.heroImageContainer}>
-          <Image
-            src="/images/plant-hero.jpg"
-            alt="Healthy plants"
-            width={500}
-            height={300}
-            style={styles.heroImage}
-          />
-        </View>
+        </ResponsiveContainer>
       </View>
 
       {/* Features Section */}
       <View style={styles.featuresSection}>
+        <ResponsiveContainer>
         <Text style={styles.sectionTitle}>Key Features</Text>
-        <View style={styles.featuresGrid}>
+        <View style={[styles.featuresGrid, isDesktop && { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }]}>
           <Card style={styles.featureCard}>
             <View style={styles.featureIconContainer}>
               <FaSearch size={32} color="#4CAF50" />
@@ -175,12 +183,14 @@ export default function Home() {
             />
           </Card>
         </View>
+        </ResponsiveContainer>
       </View>
 
       {/* How It Works Section */}
       <View style={styles.howItWorksSection}>
+        <ResponsiveContainer>
         <Text style={styles.sectionTitle}>How It Works</Text>
-        <View style={styles.stepsContainer}>
+        <View style={[styles.stepsContainer, isDesktop ? { flexDirection: 'row' } : { flexDirection: 'column' }]}>
           <View style={styles.step}>
             <View style={styles.stepNumber}>
               <Text style={styles.stepNumberText}>1</Text>
@@ -219,10 +229,12 @@ export default function Home() {
             </Text>
           </View>
         </View>
+        </ResponsiveContainer>
       </View>
 
       {/* CTA Section */}
       <View style={styles.ctaSection}>
+        <ResponsiveContainer>
         <Card style={styles.ctaCard}>
           <Text style={styles.ctaTitle}>Ready to improve your farming?</Text>
           <Text style={styles.ctaDescription}>
@@ -255,10 +267,12 @@ export default function Home() {
             )}
           </View>
         </Card>
+        </ResponsiveContainer>
       </View>
 
       {/* Footer */}
       <View style={styles.footer}>
+        <ResponsiveContainer>
         <View style={styles.footerContent}>
           <View style={styles.footerLogoSection}>
             <FaLeaf size={32} color="#4CAF50" />
@@ -308,6 +322,7 @@ export default function Home() {
             © {new Date().getFullYear()} Garden Buddy. All rights reserved.
           </Text>
         </View>
+        </ResponsiveContainer>
       </View>
     </ScrollView>
   );
@@ -319,12 +334,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   hero: {
-    flexDirection: 'row',
-    padding: 24,
     backgroundColor: '#F9FFF9',
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
     minHeight: 500,
+    paddingVertical: 48,
+  },
+  heroInner: {
+    width: '100%',
   },
   heroContent: {
     flex: 1,
@@ -375,8 +392,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   featuresGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: 'column',
     justifyContent: 'center',
     gap: 24,
   },
@@ -414,10 +430,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FFF9',
   },
   stepsContainer: {
-    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    flexWrap: 'wrap',
   },
   step: {
     width: 280,
