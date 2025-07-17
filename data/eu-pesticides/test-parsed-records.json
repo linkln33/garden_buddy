@@ -1,0 +1,210 @@
+[
+  {
+    "activeSubstance": "Copper sulfate",
+    "productName": "Bordeaux Mixture Pro",
+    "registrationNumber": "EU-001-2020",
+    "approvalStatus": "approved",
+    "approvalDate": "2020-01-15",
+    "expiryDate": "2030-12-31",
+    "approvedCrops": [
+      "Grapes",
+      "Tomatoes",
+      "Potatoes"
+    ],
+    "mrlValues": [
+      {
+        "crop": "Grapes",
+        "mrl": 5,
+        "unit": "mg/kg"
+      },
+      {
+        "crop": "Tomatoes",
+        "mrl": 1,
+        "unit": "mg/kg"
+      }
+    ],
+    "memberStates": [
+      "DE",
+      "FR",
+      "IT",
+      "ES",
+      "NL",
+      "BE"
+    ],
+    "restrictions": [
+      "Not for use near water bodies",
+      "Apply only during calm weather"
+    ],
+    "hazardClassification": [
+      "H302",
+      "H411"
+    ]
+  },
+  {
+    "activeSubstance": "Mancozeb",
+    "productName": "Mancozeb 80 WP",
+    "registrationNumber": "EU-002-2019",
+    "approvalStatus": "approved",
+    "approvalDate": "2019-03-10",
+    "expiryDate": "2029-03-10",
+    "approvedCrops": [
+      "Grapes",
+      "Tomatoes",
+      "Cucumbers"
+    ],
+    "mrlValues": [
+      {
+        "crop": "Grapes",
+        "mrl": 2,
+        "unit": "mg/kg"
+      },
+      {
+        "crop": "Tomatoes",
+        "mrl": 0.5,
+        "unit": "mg/kg"
+      }
+    ],
+    "memberStates": [
+      "DE",
+      "FR",
+      "IT",
+      "ES",
+      "NL",
+      "BE",
+      "AT"
+    ],
+    "restrictions": [
+      "Wear protective equipment",
+      "Do not apply before rain"
+    ],
+    "hazardClassification": [
+      "H317",
+      "H361d",
+      "H400"
+    ]
+  },
+  {
+    "activeSubstance": "Azoxystrobin",
+    "productName": "Azoxy Pro 250",
+    "registrationNumber": "EU-003-2021",
+    "approvalStatus": "approved",
+    "approvalDate": "2021-06-01",
+    "expiryDate": "2031-05-31",
+    "approvedCrops": [
+      "Grapes",
+      "Apples",
+      "wheat"
+    ],
+    "mrlValues": [
+      {
+        "crop": "Grapes",
+        "mrl": 2,
+        "unit": "mg/kg"
+      },
+      {
+        "crop": "Apples",
+        "mrl": 1,
+        "unit": "mg/kg"
+      },
+      {
+        "crop": "wheat",
+        "mrl": 0.1,
+        "unit": "mg/kg"
+      }
+    ],
+    "memberStates": [
+      "DE",
+      "FR",
+      "IT",
+      "ES",
+      "NL",
+      "BE",
+      "AT",
+      "DK"
+    ],
+    "restrictions": [
+      "Maximum 3 applications per season"
+    ],
+    "hazardClassification": [
+      "H319",
+      "H410"
+    ]
+  },
+  {
+    "activeSubstance": "Tebuconazole",
+    "productName": "Tebu Forte 250",
+    "registrationNumber": "EU-004-2020",
+    "approvalStatus": "approved",
+    "approvalDate": "2020-09-15",
+    "expiryDate": "2030-09-14",
+    "approvedCrops": [
+      "Grapes",
+      "wheat",
+      "Barley"
+    ],
+    "mrlValues": [
+      {
+        "crop": "Grapes",
+        "mrl": 1,
+        "unit": "mg/kg"
+      },
+      {
+        "crop": "wheat",
+        "mrl": 0.2,
+        "unit": "mg/kg"
+      }
+    ],
+    "memberStates": [
+      "DE",
+      "FR",
+      "IT",
+      "ES",
+      "NL",
+      "BE",
+      "AT",
+      "DK",
+      "SE"
+    ],
+    "restrictions": [
+      "Not for organic production",
+      "PHI 21 days"
+    ],
+    "hazardClassification": [
+      "H302",
+      "H360D",
+      "H411"
+    ]
+  },
+  {
+    "activeSubstance": "Glyphosate",
+    "productName": "Roundup Max",
+    "registrationNumber": "EU-005-2018",
+    "approvalStatus": "pending",
+    "approvalDate": "2018-12-01",
+    "expiryDate": "2025-12-31",
+    "approvedCrops": [
+      "All crops"
+    ],
+    "mrlValues": [],
+    "memberStates": [
+      "DE",
+      "FR",
+      "IT",
+      "ES",
+      "NL",
+      "BE",
+      "AT",
+      "DK",
+      "SE",
+      "FI"
+    ],
+    "restrictions": [
+      "Restricted use",
+      "Professional only"
+    ],
+    "hazardClassification": [
+      "H318",
+      "H411"
+    ]
+  }
+]

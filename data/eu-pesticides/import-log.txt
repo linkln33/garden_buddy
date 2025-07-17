@@ -1,0 +1,7 @@
+[2025-07-17T07:38:31.325Z] Starting EU pesticide data import...
+[2025-07-17T07:38:31.330Z] File not found: active-substances.csv
+[2025-07-17T07:38:31.330Z] File not found: plant-protection-products.csv
+[2025-07-17T07:38:31.330Z] Processing: test-eu-pesticides.csv
+[2025-07-17T07:38:31.332Z] Parsed 5 records from test-eu-pesticides.csv
+[2025-07-17T07:38:32.221Z] Successfully imported 5 records
+[2025-07-17T07:38:32.221Z] Import complete! Total records processed: 5
