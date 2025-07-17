@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Garden Buddy Storage Test</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2c7744;
+      border-bottom: 2px solid #2c7744;
+      padding-bottom: 10px;
+    }
+    button {
+      background-color: #2c7744;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #235f36;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+    }
+    .success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+    .log {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      padding: 10px;
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-bottom: 1px solid #eee;
+    }
+    .success-log {
+      color: #155724;
+    }
+    .error-log {
+      color: #721c24;
+    }
+    .info-log {
+      color: #0c5460;
+    }
+    #uploadForm {
+      margin: 20px 0;
+    }
+    #imagePreview {
+      max-width: 100%;
+      max-height: 300px;
+      margin-top: 10px;
+      display: none;
+    }
+    .policy-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .policy-table th, .policy-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    .policy-table th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Garden Buddy Storage Test</h1>
+    
+    <h2>1. Test Connection</h2>
+    <button id="testConnection">Test Supabase Connection</button>
+    
+    <h2>2. Test Storage Bucket</h2>
+    <button id="testBucket">Check plant-images Bucket</button>
+    
+    <h2>3. Upload Test Image</h2>
+    <form id="uploadForm">
+      <input type="file" id="imageInput" accept="image/*">
+      <button type="submit">Upload Image</button>
+    </form>
+    <img id="imagePreview" alt="Uploaded image preview">
+    
+    <h2>4. List Files</h2>
+    <button id="listFiles">List Files in Bucket</button>
+    
+    <div id="log" class="log"></div>
+  </div>
+
+  <script>
+    // Initialize Supabase client
+    const supabaseUrl = localStorage.getItem('supabaseUrl') || '';
+    const supabaseKey = localStorage.getItem('supabaseKey') || '';
+    
+    let supabase;
+    
+    if (supabaseUrl && supabaseKey) {
+      supabase = supabase.createClient(supabaseUrl, supabaseKey);
+      logMessage('Supabase client initialized with stored credentials', 'info');
+    } else {
+      logMessage('No stored Supabase credentials found. Please enter them below:', 'info');
+      
+      // Prompt for credentials if not found
+      setTimeout(() => {
+        const url = prompt('Enter your Supabase URL:', '');
+        const key = prompt('Enter your Supabase Anon Key:', '');
+        
+        if (url && key) {
+          localStorage.setItem('supabaseUrl', url);
+          localStorage.setItem('supabaseKey', key);
+          supabase = supabase.createClient(url, key);
+          logMessage('Credentials saved and Supabase client initialized', 'success');
+        } else {
+          logMessage('Supabase credentials required to use this tool', 'error');
+        }
+      }, 500);
+    }
+    
+    // Test connection
+    document.getElementById('testConnection').addEventListener('click', async () => {
+      if (!supabase) {
+        logMessage('Supabase client not initialized', 'error');
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase.from('users').select('count').limit(1);
+        
+        if (error) {
+          logMessage(`Connection error: ${error.message}`, 'error');
+        } else {
+          logMessage('Connection successful! Database is accessible', 'success');
+        }
+      } catch (err) {
+        logMessage(`Error: ${err.message}`, 'error');
+      }
+    });
+    
+    // Test bucket
+    document.getElementById('testBucket').addEventListener('click', async () => {
+      if (!supabase) {
+        logMessage('Supabase client not initialized', 'error');
+        return;
+      }
+      
+      try {
+        // Check buckets
+        const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+        
+        if (bucketsError) {
+          logMessage(`Error listing buckets: ${bucketsError.message}`, 'error');
+          return;
+        }
+        
+        logMessage(`Found ${buckets.length} buckets`, 'info');
+        
+        const plantImagesBucket = buckets.find(b => b.name === 'plant-images');
+        if (plantImagesBucket) {
+          logMessage('✅ plant-images bucket exists!', 'success');
+          logMessage(`Public access: ${plantImagesBucket.public ? 'Enabled' : 'Disabled'}`, 'info');
+          logMessage(`Created at: ${new Date(plantImagesBucket.created_at).toLocaleString()}`, 'info');
+        } else {
+          logMessage('❌ plant-images bucket not found', 'error');
+          logMessage(`Available buckets: ${buckets.map(b => b.name).join(', ')}`, 'info');
+        }
+        
+        // Try to list files to test policies
+        const { data: files, error: listError } = await supabase.storage
+          .from('plant-images')
+          .list('', { limit: 10 });
+        
+        if (listError) {
+          logMessage(`Error listing files: ${listError.message}`, 'error');
+          if (listError.message.includes('policy')) {
+            logMessage('This appears to be a policy issue. Check your SELECT policies.', 'info');
+          }
+        } else {
+          logMessage(`Successfully listed files! Found ${files.length} files`, 'success');
+          files.forEach(file => {
+            logMessage(`- ${file.name}`, 'info');
+          });
+        }
+      } catch (err) {
+        logMessage(`Error: ${err.message}`, 'error');
+      }
+    });
+    
+    // Upload image
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!supabase) {
+        logMessage('Supabase client not initialized', 'error');
+        return;
+      }
+      
+      const fileInput = document.getElementById('imageInput');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        logMessage('Please select an image to upload', 'error');
+        return;
+      }
+      
+      if (!file.type.startsWith('image/')) {
+        logMessage('Selected file is not an image', 'error');
+        return;
+      }
+      
+      logMessage(`Uploading ${file.name} (${file.type}, ${Math.round(file.size / 1024)} KB)...`, 'info');
+      
+      try {
+        const fileName = `test-${Date.now()}-${file.name}`;
+        
+        const { data, error } = await supabase.storage
+          .from('plant-images')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+        
+        if (error) {
+          logMessage(`Upload error: ${error.message}`, 'error');
+          
+          if (error.message.includes('policy')) {
+            logMessage('This appears to be a policy issue. Check your INSERT policies.', 'info');
+          }
+        } else {
+          logMessage(`Upload successful! File path: ${data.path}`, 'success');
+          
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from('plant-images')
+            .getPublicUrl(data.path);
+          
+          logMessage(`Public URL: ${urlData.publicUrl}`, 'success');
+          
+          // Show preview
+          const preview = document.getElementById('imagePreview');
+          preview.src = urlData.publicUrl;
+          preview.style.display = 'block';
+        }
+      } catch (err) {
+        logMessage(`Error: ${err.message}`, 'error');
+      }
+    });
+    
+    // List files
+    document.getElementById('listFiles').addEventListener('click', async () => {
+      if (!supabase) {
+        logMessage('Supabase client not initialized', 'error');
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase.storage
+          .from('plant-images')
+          .list('', { limit: 100 });
+        
+        if (error) {
+          logMessage(`Error listing files: ${error.message}`, 'error');
+        } else {
+          logMessage(`Found ${data.length} files in plant-images bucket:`, 'success');
+          
+          if (data.length === 0) {
+            logMessage('No files found in bucket', 'info');
+          } else {
+            data.forEach(file => {
+              logMessage(`- ${file.name} (${new Date(file.created_at).toLocaleString()})`, 'info');
+            });
+          }
+        }
+      } catch (err) {
+        logMessage(`Error: ${err.message}`, 'error');
+      }
+    });
+    
+    // Helper function to log messages
+    function logMessage(message, type = 'info') {
+      const log = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}-log`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      log.prepend(entry);
+    }
+  </script>
+</body>
+</html>
