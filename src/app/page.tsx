@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useIsDesktop } from '../utils/responsive';
 import ResponsiveContainer from '../components/layout/ResponsiveContainer';
-import { FaLeaf, FaSearch, FaCloudSun, FaUsers, FaBook, FaArrowRight, FaChartBar } from 'react-icons/fa';
+import { FaLeaf, FaSearch, FaCloudSun, FaUsers, FaBook, FaArrowRight, FaChartBar, 
+         FaMapMarkerAlt, FaCamera, FaExclamationTriangle, FaShieldAlt, FaDatabase } from 'react-icons/fa';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import Card from '../components/ui/Card';
@@ -16,6 +17,7 @@ import type { Database } from '../lib/supabase/types';
 
 /**
  * Home page for Garden Buddy app
+ * Redesigned to match Agrio style with modern UI
  */
 export default function Home() {
   const [user, setUser] = React.useState<any | null>(null);
@@ -43,75 +45,119 @@ export default function Home() {
     checkUser();
   }, []);
 
-  // Handle navigation to diagnose page
-  const handleDiagnoseClick = () => {
+  // Navigation handlers with authentication check
+  const navigateTo = (path: string) => {
     if (user) {
-      router.push('/diagnose');
+      router.push(path);
     } else {
-      router.push('/login?redirect=/diagnose');
+      router.push(`/login?redirect=${path}`);
     }
   };
+
+  // Handle navigation to diagnose page
+  const handleDiagnoseClick = () => navigateTo('/diagnose');
 
   // Handle navigation to community page
-  const handleCommunityClick = () => {
-    if (user) {
-      router.push('/community');
-    } else {
-      router.push('/login?redirect=/community');
-    }
-  };
+  const handleCommunityClick = () => navigateTo('/community');
 
   // Handle navigation to weather page
-  const handleWeatherClick = () => {
-    if (user) {
-      router.push('/weather');
-    } else {
-      router.push('/login?redirect=/weather');
-    }
-  };
+  const handleWeatherClick = () => navigateTo('/weather');
 
   // Handle navigation to logbook page
-  const handleLogbookClick = () => {
-    if (user) {
-      router.push('/logbook');
-    } else {
-      router.push('/login?redirect=/logbook');
-    }
-  };
+  const handleLogbookClick = () => navigateTo('/logbook');
+  
+  // Handle navigation to offline diagnosis page
+  const handleOfflineDiagnosisClick = () => navigateTo('/diagnose/offline');
 
   return (
     <ScrollView style={styles.container}>
+      {/* Header with Logo */}
+      <View style={styles.header}>
+        <ResponsiveContainer>
+          <View style={styles.headerInner}>
+            <View style={styles.logoContainer}>
+              <FaLeaf size={32} color="#4CAF50" />
+              <Text style={styles.logoText}>Garden Buddy</Text>
+            </View>
+            <View style={styles.headerNav}>
+              {isDesktop && (
+                <>
+                  <Link href="/features" passHref>
+                    <Text style={styles.navLink}>Features</Text>
+                  </Link>
+                  <Link href="/about" passHref>
+                    <Text style={styles.navLink}>About</Text>
+                  </Link>
+                  <Link href="/blog" passHref>
+                    <Text style={styles.navLink}>Blog</Text>
+                  </Link>
+                </>
+              )}
+              {!user ? (
+                <View style={styles.authButtons}>
+                  <Button
+                    title="Log In"
+                    onPress={() => router.push('/login')}
+                    variant="outline"
+                    size="small"
+                  />
+                  <Button
+                    title="Sign Up"
+                    onPress={() => router.push('/register')}
+                    variant="primary"
+                    size="small"
+                  />
+                </View>
+              ) : (
+                <Button
+                  title="Dashboard"
+                  onPress={() => router.push('/dashboard')}
+                  variant="primary"
+                  size="small"
+                />
+              )}
+            </View>
+          </View>
+        </ResponsiveContainer>
+      </View>
+      
       {/* Hero Section */}
       <View style={styles.hero}>
         <ResponsiveContainer>
-        <View style={[styles.heroInner, isDesktop ? { flexDirection: 'row' } : { flexDirection: 'column-reverse' }]}>
-          <View style={[styles.heroContent, isDesktop && { paddingRight: 48, flex: 1 }]}>
-            <View style={styles.logoContainer}>
-              <FaLeaf size={48} color="#4CAF50" />
-              <Text style={styles.logoText}>Garden Buddy</Text>
+          <View style={[styles.heroInner, isDesktop ? { flexDirection: 'row' } : { flexDirection: 'column-reverse' }]}>
+            <View style={[styles.heroContent, isDesktop && { paddingRight: 48, flex: 1 }]}>
+              <Text style={[styles.heroTitle, isDesktop && { fontSize: 48, lineHeight: 56 }]}>
+                Precision plant protection.
+                <Text style={styles.heroTitleHighlight}> made easy!</Text>
+              </Text>
+              <Text style={styles.heroSubtitle}>
+                AI-powered plant disease diagnosis, weather monitoring, and treatment recommendations for optimal plant health.
+              </Text>
+              <View style={styles.heroButtons}>
+                <Button
+                  title="Get Started"
+                  onPress={handleDiagnoseClick}
+                  variant="primary"
+                  size="large"
+                />
+                <Button
+                  title="See how it works"
+                  onPress={() => router.push('#how-it-works')}
+                  variant="outline"
+                  size="large"
+                />
+              </View>
             </View>
-            <Text style={[styles.heroTitle, isDesktop && { fontSize: 48, lineHeight: 56 }]}>Your AI-Powered Smart Farming Assistant</Text>
-            <Text style={styles.heroSubtitle}>
-              Detect plant diseases, get treatment recommendations, and monitor weather conditions for optimal plant health.
-            </Text>
-            <Button
-              title="Get Started"
-              onPress={handleDiagnoseClick}
-              variant="primary"
-              size="large"
-              icon={<FaArrowRight size={16} color="#FFFFFF" />}
-            />
+            <View style={[styles.heroImageContainer, isDesktop ? { flex: 1 } : { marginBottom: 32 }]}>
+              <Image
+                src="/images/plant-hero.jpg"
+                alt="Garden Buddy App"
+                width={isDesktop ? 600 : 400}
+                height={isDesktop ? 400 : 240}
+                style={styles.heroImage}
+              />
+            </View>
           </View>
-          <View style={[styles.heroImageContainer, isDesktop ? { flex: 1 } : { marginBottom: 32 }]}>
-            <Image
-              src="/images/plant-hero.jpg"
-              alt="Healthy plants"
-              width={isDesktop ? 600 : 400}
-              height={isDesktop ? 400 : 240}
-              style={styles.heroImage}
-            />
-          </View>
-        </View>
         </ResponsiveContainer>
       </View>
 
@@ -129,216 +175,268 @@ export default function Home() {
         </View>
       )}
 
-      {/* Features Section */}
-      <View style={styles.featuresSection}>
+      {/* AI Plant Disease Recognition Section */}
+      <View style={styles.recognitionSection}>
         <ResponsiveContainer>
-        <Text style={styles.sectionTitle}>Key Features</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.featuresScrollView}>
-          <View style={styles.featuresGrid}>
-          <Card style={styles.featureCard}>
-            <View style={styles.featureIconContainer}>
-              <FaSearch size={32} color="#4CAF50" />
+          <View style={[styles.recognitionInner, isDesktop ? { flexDirection: 'row' } : { flexDirection: 'column' }]}>
+            <View style={[styles.recognitionImageContainer, isDesktop ? { flex: 1, marginRight: 48 } : { marginBottom: 32 }]}>
+              <View style={styles.phoneFrameContainer}>
+                <View style={styles.phoneResultsCard}>
+                  <Text style={styles.resultsTitle}>Results</Text>
+                  <View style={styles.diseaseResultContainer}>
+                    <Image
+                      src="/images/plant-disease-sample.jpg"
+                      alt="Plant disease sample"
+                      width={120}
+                      height={120}
+                      style={styles.diseaseSampleImage}
+                    />
+                    <View style={styles.diseaseInfo}>
+                      <Text style={styles.diseaseName}>Aceria Oleae</Text>
+                      <Text style={styles.confidenceScore}>Confidence: 97%</Text>
+                    </View>
+                  </View>
+                  <View style={styles.treatmentSection}>
+                    <Text style={styles.treatmentTitle}>Conventional Treatment</Text>
+                    <Text style={styles.treatmentDescription}>
+                      Apply copper fungicide according to manufacturer instructions.
+                    </Text>
+                  </View>
+                </View>
+              </View>
             </View>
-            <Text style={styles.featureTitle}>AI Disease Detection</Text>
-            <Text style={styles.featureDescription}>
-              Upload a photo of your plant and get instant disease diagnosis with confidence scoring.
-            </Text>
-            <Button
-              title="Diagnose Now"
-              onPress={handleDiagnoseClick}
-              variant="outline"
-              size="small"
-            />
-          </Card>
-          
-          <Card style={styles.featureCard}>
-            <View style={styles.featureIconContainer}>
-              <FaUsers size={32} color="#4CAF50" />
+            
+            <View style={[styles.recognitionContent, isDesktop && { flex: 1 }]}>
+              <View style={styles.featureIconContainer}>
+                <FaSearch size={32} color="#4CAF50" />
+              </View>
+              <Text style={styles.featureSectionTitle}>App that recognizes plant diseases and pests</Text>
+              <Text style={styles.featureDescription}>
+                Images of plant problems are uploaded to the app then analyzed through our artificial intelligence algorithms. The
+                system provides users with identifications, suggested solutions and helps with decision making.
+              </Text>
+              <Button
+                title="Free Plant Health Check"
+                onPress={handleDiagnoseClick}
+                variant="primary"
+                size="large"
+              />
             </View>
-            <Text style={styles.featureTitle}>Community Voting</Text>
-            <Text style={styles.featureDescription}>
-              Get help from the community for low-confidence AI diagnoses through voting.
-            </Text>
-            <Button
-              title="Join Community"
-              onPress={handleCommunityClick}
-              variant="outline"
-              size="small"
-            />
-          </Card>
-          
-          <Card style={styles.featureCard}>
-            <View style={styles.featureIconContainer}>
-              <FaCloudSun size={32} color="#4CAF50" />
-            </View>
-            <Text style={styles.featureTitle}>Weather Alerts</Text>
-            <Text style={styles.featureDescription}>
-              Receive spray recommendations based on weather conditions to prevent diseases.
-            </Text>
-            <Button
-              title="Check Weather"
-              onPress={handleWeatherClick}
-              variant="outline"
-              size="small"
-            />
-          </Card>
-          
-          <Card style={styles.featureCard}>
-            <View style={styles.featureIconContainer}>
-              <FaBook size={32} color="#4CAF50" />
-            </View>
-            <Text style={styles.featureTitle}>Crop Logbook</Text>
-            <Text style={styles.featureDescription}>
-              Track your plant health and treatments over time with a detailed logbook.
-            </Text>
-            <Button
-              title="View Logbook"
-              onPress={handleLogbookClick}
-              variant="outline"
-              size="small"
-            />
-          </Card>
           </View>
-        </ScrollView>
         </ResponsiveContainer>
       </View>
 
-      {/* How It Works Section */}
-      <View style={styles.howItWorksSection}>
+      {/* Interactive Map Section */}
+      <View style={styles.mapSection}>
         <ResponsiveContainer>
-        <Text style={styles.sectionTitle}>How It Works</Text>
-        <View style={[styles.stepsContainer, isDesktop ? { flexDirection: 'row' } : { flexDirection: 'column' }]}>
-          <View style={styles.step}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>1</Text>
+          <View style={[styles.mapInner, isDesktop ? { flexDirection: 'row-reverse' } : { flexDirection: 'column' }]}>
+            <View style={[styles.mapImageContainer, isDesktop ? { flex: 1, marginLeft: 48 } : { marginBottom: 32 }]}>
+              <Image
+                src="/images/field-map-sample.jpg"
+                alt="Interactive field map"
+                width={isDesktop ? 600 : 400}
+                height={isDesktop ? 350 : 240}
+                style={styles.mapImage}
+              />
             </View>
-            <Text style={styles.stepTitle}>Take a Photo</Text>
-            <Text style={styles.stepDescription}>
-              Capture a clear image of your plant's affected area using your device's camera.
-            </Text>
-          </View>
-          
-          <View style={styles.stepArrow}>
-            <FaArrowRight size={24} color="#CCCCCC" />
-          </View>
-          
-          <View style={styles.step}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>2</Text>
+            
+            <View style={[styles.mapContent, isDesktop && { flex: 1 }]}>
+              <View style={styles.featureIconContainer}>
+                <FaMapMarkerAlt size={32} color="#4CAF50" />
+              </View>
+              <Text style={styles.featureSectionTitle}>Interactive field mapping and monitoring</Text>
+              <Text style={styles.featureDescription}>
+                Track plant health across your entire property with GPS-tagged observations. Monitor disease spread, treatment effectiveness, and identify problem areas quickly.
+              </Text>
+              <Button
+                title="Learn more"
+                onPress={handleWeatherClick}
+                variant="outline"
+                size="large"
+              />
             </View>
-            <Text style={styles.stepTitle}>Get AI Diagnosis</Text>
-            <Text style={styles.stepDescription}>
-              Our AI analyzes the image and provides a diagnosis with confidence score.
-            </Text>
           </View>
-          
-          <View style={styles.stepArrow}>
-            <FaArrowRight size={24} color="#CCCCCC" />
-          </View>
-          
-          <View style={styles.step}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>3</Text>
+        </ResponsiveContainer>
+      </View>
+
+      {/* AI Alert System Section */}
+      <View style={styles.alertSection}>
+        <ResponsiveContainer>
+          <View style={[styles.alertInner, isDesktop ? { flexDirection: 'row' } : { flexDirection: 'column' }]}>
+            <View style={[styles.alertImageContainer, isDesktop ? { flex: 1, marginRight: 48 } : { marginBottom: 32 }]}>
+              <View style={styles.phoneFrameContainer}>
+                <View style={styles.alertNotification}>
+                  <View style={styles.alertHeader}>
+                    <FaExclamationTriangle size={24} color="#FF6B35" />
+                    <Text style={styles.alertTitle}>Attention!</Text>
+                  </View>
+                  <Text style={styles.alertMessage}>
+                    Alert: Powdery Mildew detected in your region. Check your plants and apply preventive measures.
+                  </Text>
+                </View>
+              </View>
             </View>
-            <Text style={styles.stepTitle}>Receive Treatment</Text>
-            <Text style={styles.stepDescription}>
-              Get personalized treatment recommendations and preventive measures.
-            </Text>
+            
+            <View style={[styles.alertContent, isDesktop && { flex: 1 }]}>
+              <View style={styles.featureIconContainer}>
+                <FaExclamationTriangle size={32} color="#4CAF50" />
+              </View>
+              <Text style={styles.featureSectionTitle}>The first AI-based alert system</Text>
+              <Text style={styles.featureDescription}>
+                Our app notifies subscribers after crop diseases and pests are detected and expected to arrive to their regions. The alerts come with written preventative measures to aid in impeding infestations.
+              </Text>
+              <Button
+                title="Start Receiving Alerts Today"
+                onPress={handleDiagnoseClick}
+                variant="primary"
+                size="large"
+              />
+            </View>
           </View>
-        </View>
+        </ResponsiveContainer>
+      </View>
+
+      {/* Offline Diagnosis Section */}
+      <View style={styles.offlineSection}>
+        <ResponsiveContainer>
+          <View style={[styles.offlineInner, isDesktop ? { flexDirection: 'row-reverse' } : { flexDirection: 'column' }]}>
+            <View style={[styles.offlineImageContainer, isDesktop ? { flex: 1, marginLeft: 48 } : { marginBottom: 32 }]}>
+              <Image
+                src="/images/offline-diagnosis.jpg"
+                alt="Offline plant diagnosis"
+                width={isDesktop ? 600 : 400}
+                height={isDesktop ? 350 : 240}
+                style={styles.offlineImage}
+              />
+            </View>
+            
+            <View style={[styles.offlineContent, isDesktop && { flex: 1 }]}>
+              <View style={styles.featureIconContainer}>
+                <FaDatabase size={32} color="#4CAF50" />
+              </View>
+              <Text style={styles.featureSectionTitle}>Works offline when you need it most</Text>
+              <Text style={styles.featureDescription}>
+                Garden Buddy works even without internet connection. Our app includes an offline plant disease diagnosis model using the PlantVillage dataset, so you can identify plant issues anywhere, anytime.
+              </Text>
+              <Button
+                title="Try Offline Diagnosis"
+                onPress={handleOfflineDiagnosisClick}
+                variant="outline"
+                size="large"
+              />
+            </View>
+          </View>
         </ResponsiveContainer>
       </View>
 
       {/* CTA Section */}
       <View style={styles.ctaSection}>
         <ResponsiveContainer>
-        <Card style={styles.ctaCard}>
-          <Text style={styles.ctaTitle}>Ready to improve your farming?</Text>
-          <Text style={styles.ctaDescription}>
-            Join thousands of farmers using Garden Buddy to keep their plants healthy and increase yields.
-          </Text>
-          <View style={styles.ctaButtons}>
-            {!user ? (
-              <>
+          <Card style={styles.ctaCard}>
+            <Text style={styles.ctaTitle}>Join Garden Buddy, the most advanced plant protection app</Text>
+            <Text style={styles.ctaDescription}>
+              Start protecting your plants today with our AI-powered diagnosis and treatment recommendations.
+            </Text>
+            <View style={styles.ctaButtons}>
+              {!user ? (
+                <>
+                  <Button
+                    title="Sign Up Free"
+                    onPress={() => router.push('/register')}
+                    variant="primary"
+                    size="large"
+                  />
+                  <Button
+                    title="See Demo"
+                    onPress={() => router.push('/demo')}
+                    variant="outline"
+                    size="large"
+                  />
+                </>
+              ) : (
                 <Button
-                  title="Sign Up"
-                  onPress={() => router.push('/register')}
+                  title="Go to Dashboard"
+                  onPress={() => router.push('/dashboard')}
                   variant="primary"
                   size="large"
+                  icon={<FaChartBar size={16} color="#FFFFFF" />}
                 />
-                <Button
-                  title="Log In"
-                  onPress={() => router.push('/login')}
-                  variant="outline"
-                  size="large"
-                />
-              </>
-            ) : (
-              <Button
-                title="Go to Dashboard"
-                onPress={() => router.push('/diagnose')}
-                variant="primary"
-                size="large"
-                icon={<FaChartBar size={16} color="#FFFFFF" />}
+              )}
+            </View>
+            <View style={styles.appStoreButtons}>
+              <Image
+                src="/images/google-play-badge.png"
+                alt="Get it on Google Play"
+                width={135}
+                height={40}
+                style={styles.storeBadge}
               />
-            )}
-          </View>
-        </Card>
+              <Image
+                src="/images/app-store-badge.png"
+                alt="Download on the App Store"
+                width={135}
+                height={40}
+                style={styles.storeBadge}
+              />
+            </View>
+          </Card>
         </ResponsiveContainer>
       </View>
 
       {/* Footer */}
       <View style={styles.footer}>
         <ResponsiveContainer>
-        <View style={styles.footerContent}>
-          <View style={styles.footerLogoSection}>
-            <FaLeaf size={32} color="#4CAF50" />
-            <Text style={styles.footerLogoText}>Garden Buddy</Text>
-            <Text style={styles.footerTagline}>
-              AI-powered smart farming assistant
-            </Text>
-          </View>
-          
-          <View style={styles.footerLinks}>
-            <View style={styles.footerLinkColumn}>
-              <Text style={styles.footerLinkHeader}>Features</Text>
-              <Link href="/diagnose" passHref>
-                <Text style={styles.footerLink}>Disease Detection</Text>
-              </Link>
-              <Link href="/community" passHref>
-                <Text style={styles.footerLink}>Community Voting</Text>
-              </Link>
-              <Link href="/weather" passHref>
-                <Text style={styles.footerLink}>Weather Alerts</Text>
-              </Link>
-              <Link href="/logbook" passHref>
-                <Text style={styles.footerLink}>Crop Logbook</Text>
-              </Link>
+          <View style={[styles.footerContent, isDesktop ? { flexDirection: 'row', justifyContent: 'space-between' } : { flexDirection: 'column' }]}>
+            <View style={styles.footerLogoSection}>
+              <View style={styles.logoContainer}>
+                <FaLeaf size={24} color="#4CAF50" />
+                <Text style={[styles.logoText, { fontSize: 18 }]}>Garden Buddy</Text>
+              </View>
+              <Text style={styles.footerTagline}>Your AI-Powered Plant Protection Assistant</Text>
             </View>
             
-            <View style={styles.footerLinkColumn}>
-              <Text style={styles.footerLinkHeader}>Company</Text>
-              <Link href="/about" passHref>
-                <Text style={styles.footerLink}>About Us</Text>
-              </Link>
-              <Link href="/privacy" passHref>
-                <Text style={styles.footerLink}>Privacy Policy</Text>
-              </Link>
-              <Link href="/terms" passHref>
-                <Text style={styles.footerLink}>Terms of Service</Text>
-              </Link>
-              <Link href="/contact" passHref>
-                <Text style={styles.footerLink}>Contact Us</Text>
-              </Link>
+            <View style={[styles.footerLinks, isDesktop ? { flexDirection: 'row' } : { flexDirection: 'column', marginTop: 24 }]}>
+              <View style={styles.footerLinkColumn}>
+                <Text style={styles.footerLinkHeader}>Product</Text>
+                <Link href="/features" passHref>
+                  <Text style={styles.footerLink}>Features</Text>
+                </Link>
+                <Link href="/pricing" passHref>
+                  <Text style={styles.footerLink}>Pricing</Text>
+                </Link>
+                <Link href="/demo" passHref>
+                  <Text style={styles.footerLink}>Demo</Text>
+                </Link>
+              </View>
+              
+              <View style={styles.footerLinkColumn}>
+                <Text style={styles.footerLinkHeader}>Company</Text>
+                <Link href="/about" passHref>
+                  <Text style={styles.footerLink}>About Us</Text>
+                </Link>
+                <Link href="/blog" passHref>
+                  <Text style={styles.footerLink}>Blog</Text>
+                </Link>
+                <Link href="/contact" passHref>
+                  <Text style={styles.footerLink}>Contact</Text>
+                </Link>
+              </View>
+              
+              <View style={styles.footerLinkColumn}>
+                <Text style={styles.footerLinkHeader}>Legal</Text>
+                <Link href="/privacy" passHref>
+                  <Text style={styles.footerLink}>Privacy Policy</Text>
+                </Link>
+                <Link href="/terms" passHref>
+                  <Text style={styles.footerLink}>Terms of Service</Text>
+                </Link>
+              </View>
             </View>
           </View>
-        </View>
-        
-        <View style={styles.footerBottom}>
-          <Text style={styles.copyright}>
-            © {new Date().getFullYear()} Garden Buddy. All rights reserved.
-          </Text>
-        </View>
+          
+          <View style={styles.footerBottom}>
+            <Text style={styles.copyright}>  {new Date().getFullYear()} Garden Buddy. All rights reserved.</Text>
+          </View>
         </ResponsiveContainer>
       </View>
     </ScrollView>
@@ -350,38 +448,63 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  hero: {
-    backgroundColor: '#F9FFF9',
+  // Header styles
+  header: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-    minHeight: 500,
-    paddingVertical: 48,
+    borderBottomColor: '#EEEEEE',
+  },
+  headerInner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 24,
+  },
+  navLink: {
+    color: '#333333',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  authButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  // Hero section styles
+  hero: {
+    backgroundColor: '#F8F9FA',
+    paddingVertical: 64,
   },
   heroInner: {
-    width: '100%',
+    alignItems: 'center',
   },
   heroContent: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingRight: 24,
+    paddingVertical: 24,
   },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   logoText: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#4CAF50',
-    marginLeft: 12,
+    fontWeight: 'bold',
+    marginLeft: 8,
+    color: '#333333',
   },
   heroTitle: {
     fontSize: 36,
-    fontWeight: '700',
+    fontWeight: 'bold',
     color: '#333333',
     marginBottom: 16,
     lineHeight: 44,
+  },
+  heroTitleHighlight: {
+    color: '#4CAF50',
   },
   heroSubtitle: {
     fontSize: 18,
@@ -389,124 +512,207 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     lineHeight: 28,
   },
-  heroImageContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  heroImage: {
-    borderRadius: 16,
-  },
-  weatherSection: {
-    paddingVertical: 24,
-    backgroundColor: '#FAFAFA',
-  },
-  featuresSection: {
-    padding: 24,
-    marginTop: 24,
-  },
-  sectionTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#333333',
-    marginBottom: 24,
-    textAlign: 'center',
-  },
-  featuresScrollView: {
+  heroButtons: {
+    flexDirection: 'row',
+    gap: 16,
     marginBottom: 16,
   },
-  featuresGrid: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    gap: 16,
-    paddingHorizontal: 4,
-    paddingBottom: 8,
-  },
-  featureCard: {
-    width: 280,
-    padding: 24,
+  heroImageContainer: {
     alignItems: 'center',
-    marginRight: 8,
+    justifyContent: 'center',
+  },
+  heroImage: {
+    borderRadius: 12,
+    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+  },
+  // Weather section styles
+  weatherSection: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 32,
+  },
+  // Recognition section styles
+  recognitionSection: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 64,
+  },
+  recognitionInner: {
+    alignItems: 'center',
+  },
+  recognitionContent: {
+    paddingVertical: 24,
+  },
+  featureSectionTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 16,
+    lineHeight: 40,
+  },
+  featureDescription: {
+    fontSize: 18,
+    color: '#666666',
+    marginBottom: 32,
+    lineHeight: 28,
   },
   featureIconContainer: {
     width: 64,
     height: 64,
     borderRadius: 32,
     backgroundColor: '#E8F5E9',
+    alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 24,
+  },
+  recognitionImageContainer: {
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  featureTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333333',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  featureDescription: {
-    fontSize: 16,
-    color: '#666666',
-    marginBottom: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  howItWorksSection: {
-    padding: 24,
-    marginTop: 24,
-    backgroundColor: '#F9FFF9',
-  },
-  stepsContainer: {
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  step: {
-    width: 280,
-    alignItems: 'center',
+  phoneFrameContainer: {
     padding: 16,
-  },
-  stepNumber: {
-    width: 48,
-    height: 48,
+    backgroundColor: '#F5F5F5',
     borderRadius: 24,
-    backgroundColor: '#4CAF50',
-    justifyContent: 'center',
-    alignItems: 'center',
+    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+  },
+  phoneResultsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    width: 280,
+  },
+  resultsTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333333',
     marginBottom: 16,
   },
-  stepNumberText: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#FFFFFF',
+  diseaseResultContainer: {
+    flexDirection: 'row',
+    marginBottom: 16,
   },
-  stepTitle: {
+  diseaseSampleImage: {
+    borderRadius: 8,
+    marginRight: 16,
+  },
+  diseaseInfo: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  diseaseName: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: 'bold',
     color: '#333333',
     marginBottom: 8,
-    textAlign: 'center',
   },
-  stepDescription: {
+  confidenceScore: {
+    fontSize: 14,
+    color: '#4CAF50',
+    fontWeight: '500',
+  },
+  treatmentSection: {
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+    paddingTop: 16,
+  },
+  treatmentTitle: {
     fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 8,
+  },
+  treatmentDescription: {
+    fontSize: 14,
     color: '#666666',
-    textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 20,
   },
-  stepArrow: {
-    margin: 16,
+  // Map section styles
+  mapSection: {
+    backgroundColor: '#F8F9FA',
+    paddingVertical: 64,
   },
+  mapInner: {
+    alignItems: 'center',
+  },
+  mapContent: {
+    paddingVertical: 24,
+  },
+  mapImageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapImage: {
+    borderRadius: 12,
+    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+  },
+  // Alert section styles
+  alertSection: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 64,
+  },
+  alertInner: {
+    alignItems: 'center',
+  },
+  alertContent: {
+    paddingVertical: 24,
+  },
+  alertImageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  alertNotification: {
+    backgroundColor: '#FFF8E1',
+    borderRadius: 16,
+    padding: 16,
+    width: 280,
+  },
+  alertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  alertTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FF6B35',
+    marginLeft: 8,
+  },
+  alertMessage: {
+    fontSize: 14,
+    color: '#333333',
+    lineHeight: 20,
+  },
+  // Offline section styles
+  offlineSection: {
+    backgroundColor: '#F8F9FA',
+    paddingVertical: 64,
+  },
+  offlineInner: {
+    alignItems: 'center',
+  },
+  offlineContent: {
+    paddingVertical: 24,
+  },
+  offlineImageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  offlineImage: {
+    borderRadius: 12,
+    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+  },
+  // CTA section styles
   ctaSection: {
-    padding: 24,
-    marginTop: 24,
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 64,
   },
   ctaCard: {
-    padding: 32,
+    padding: 48,
     alignItems: 'center',
     backgroundColor: '#E8F5E9',
+    borderRadius: 16,
   },
   ctaTitle: {
-    fontSize: 28,
-    fontWeight: '700',
+    fontSize: 32,
+    fontWeight: 'bold',
     color: '#333333',
     marginBottom: 16,
     textAlign: 'center',
@@ -516,47 +722,42 @@ const styles = StyleSheet.create({
     color: '#666666',
     marginBottom: 32,
     textAlign: 'center',
-    lineHeight: 28,
     maxWidth: 600,
+    lineHeight: 28,
   },
   ctaButtons: {
     flexDirection: 'row',
     gap: 16,
+    marginBottom: 32,
   },
+  appStoreButtons: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  storeBadge: {
+    borderRadius: 8,
+  },
+  // Footer styles
   footer: {
-    marginTop: 48,
     backgroundColor: '#333333',
-    padding: 24,
+    paddingVertical: 64,
+    paddingBottom: 32,
   },
   footerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    paddingBottom: 32,
-    borderBottomWidth: 1,
-    borderBottomColor: '#444444',
+    marginBottom: 48,
   },
   footerLogoSection: {
     marginBottom: 24,
   },
-  footerLogoText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginTop: 12,
-    marginBottom: 8,
-  },
   footerTagline: {
-    fontSize: 16,
     color: '#CCCCCC',
+    marginTop: 8,
   },
   footerLinks: {
-    flexDirection: 'row',
     gap: 48,
-    flexWrap: 'wrap',
   },
   footerLinkColumn: {
-    minWidth: 160,
+    marginBottom: 24,
   },
   footerLinkHeader: {
     fontSize: 18,
